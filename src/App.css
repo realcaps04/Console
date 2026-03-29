@@ -126,6 +126,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0; /* CRITICAL: prevents flex layout from exploding due to nested carousel track */
+  width: 100%;
 }
 
 /* Top Navigation */
@@ -283,10 +285,12 @@
 .hero-container {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* ensure top alignment, not center */
   gap: 4rem;
   position: relative;
   z-index: 10;
+  flex-wrap: wrap; /* Prevent rigid width from stretching the screen */
+  width: 100%; /* forces left/right docking */
 }
 
 .hero-content {
@@ -333,8 +337,8 @@
   padding: 0.55rem 1rem;
   gap: 1.5rem;
   border: 1px solid #e5e7eb;
-  width: fit-content;
-  min-width: 440px;
+  width: 100%;
+  max-width: 440px; /* changed from min-width to max-width so it shrinks */
   position: relative;
   z-index: 10;
 }
@@ -451,11 +455,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: box-shadow 0.18s, transform 0.18s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+/* Hovering the entire card applies blue styling everywhere */
 .carousel-card:hover {
-  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  border-color: #2f6be8;
+  box-shadow: 0 8px 28px rgba(47, 107, 232, 0.12); /* blue tinted shadow for card */
   transform: translateY(-3px);
 }
 
@@ -464,6 +470,12 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  transition: color 0.2s ease;
+}
+
+/* Change category name to blue on hover */
+.carousel-card:hover h3 {
+  color: #2f6be8;
 }
 
 .carousel-card p {
@@ -471,7 +483,40 @@
   color: var(--text-secondary);
   line-height: 1.55;
   flex-grow: 1;
-  margin: 0;
+  margin: 0 0 1rem 0; /* Add bottom margin so the Explore button has breathing room */
+}
+
+/* Initial "Explore" link state inside card */
+.carousel-card .card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2f6be8;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  border: 1px solid transparent;
+  width: fit-content;
+  margin-left: -1.25rem; /* Visually aligns text with paragraphs while keeping padding */
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+/* Explore link transforms to solid button explicitly when card is hovered */
+.carousel-card:hover .card-link {
+  background-color: #2f6be8;
+  color: #ffffff;
+  border-color: #2f6be8;
+  box-shadow: 0 4px 12px rgba(47, 107, 232, 0.3);
+}
+
+/* Extra hover directly on the Explore button while card is hovered */
+.carousel-card:hover .card-link:hover {
+  background-color: #1d57d4;
+  border-color: #1d57d4;
+  box-shadow: 0 6px 16px rgba(47, 107, 232, 0.4);
 }
 /* ─────────────────────────────────────────────────────── */
 
@@ -814,6 +859,252 @@
   color: var(--text-muted);
   font-size: 0.75rem;
   letter-spacing: 0.05em;
+}
+
+/* Testimonials Layout & Review Card */
+.review-card {
+  flex: 0 0 350px;
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;   /* Reduced padding from 2rem to compress height */
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;         /* Tighter gap to bring elements closer */
+  height: fit-content; /* Prevents stretching to the tallest card arbitrarily */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.review-card:hover {
+  border-color: #2f6be8;
+  box-shadow: 0 8px 24px rgba(47, 107, 232, 0.12);
+  transform: translateY(-3px);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.review-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f9fafb;
+}
+
+.review-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-meta h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.review-card:hover .review-meta h4 {
+  color: #2f6be8;
+}
+
+.review-meta span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.review-text {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  transition: color 0.2s ease;
+}
+
+.review-card:hover .review-text {
+  color: #2f6be8;
+}
+
+/* FAQ Section Styling */
+.faq-container {
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: #ffffff;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.faq-item:hover {
+  border-color: #2f6be8;
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.faq-item.active .faq-question {
+  color: #2f6be8;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.faq-icon {
+  color: var(--text-muted);
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
+  color: #2f6be8;
+}
+
+.faq-answer {
+  padding: 1.5rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  background-color: var(--bg-section);
+  animation: slideDown 0.3s ease forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Query Modal CSS */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(13, 15, 18, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-floating);
+  overflow: hidden;
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  color: var(--text-muted);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f3f4f6;
+  color: #ef4444;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2f6be8;
+  box-shadow: 0 0 0 3px rgba(47, 107, 232, 0.15);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* Responsive Overrides */

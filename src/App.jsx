@@ -19,12 +19,74 @@ import {
   LineChart,
   ShieldCheck,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  ChevronDown,
+  X,
+  Star
 } from 'lucide-react';
+
+const reviews = [
+  {
+    name: "Sarah Jenkins",
+    role: "CTO, Vanguard Tech",
+    rating: 5,
+    text: "Console completely transformed the velocity of our deployment pipelines. The architectural simplicity and raw performance are absolutely unmatched.",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d"
+  },
+  {
+    name: "Marcus Aurelius",
+    role: "Lead Engineer, Delta Systems",
+    rating: 5,
+    text: "Every developer on our team uses Console. The Data Hub alone saved us months of engineering effort. It is an absolute game-changer for scale.",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d"
+  },
+  {
+    name: "Elena Rodriguez",
+    role: "Product Manager, InnovateX",
+    rating: 4,
+    text: "The integrated analytics and performance tracking modules make measuring our success so incredibly straightforward and visually crisp.",
+    avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d"
+  },
+  {
+    name: "James Chen",
+    role: "Founder, StartupGrid",
+    rating: 5,
+    text: "We scaled from 1,000 to 1M users smoothly, thanks exclusively to Console's managed real-time instances and guard utilities.",
+    avatar: "https://i.pravatar.cc/150?u=a048581f4e29026701d"
+  }
+];
+
+const faqs = [
+  {
+    question: "What makes Console different from other management tools?",
+    answer: "Console is built on a proprietary headless architecture that allows seamless integration with your existing stack. It is designed for maximum performance, uncompromising security, and real-time data flow, making it ideal for scaling enterprise operations."
+  },
+  {
+    question: "Do you offer tailored solutions for startups?",
+    answer: "Yes, our modular cloud-native service architecture ensures that startups can select specific modules they need right now, and easily expand their infrastructure as their business requirements grow."
+  },
+  {
+    question: "How secure is the data stored on Console?",
+    answer: "Security is built into the foundation of Console. Our Guard utility provides end-to-end encryption and automated threat detection for all projects to keep your infrastructure in peak condition."
+  },
+  {
+    question: "Can I integrate my custom APIs with Console?",
+    answer: "Absolutely. Data Hub supports high-concurrency data storage and automated sharding, making it trivial to pipe in custom APIs and achieve real-time syncing across your entire stack."
+  }
+];
 
 function App() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [todos, setTodos] = useState([]);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+  const reviewCarouselRef = useRef(null);
+
+  const scrollReviews = (direction) => {
+    if (reviewCarouselRef.current) {
+      reviewCarouselRef.current.scrollBy({ left: direction * 400, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     async function getTodos() {
@@ -72,10 +134,10 @@ function App() {
       {false && (
         <aside className="sidebar">
           <div className="brand-header">
-            <h1 className="brand-title">Console</h1>
+            <h1 className="brand-title" style={{ color: '#2f6be8' }}>Console</h1>
             <div className="brand-subtitle-group">
               <div className="brand-subtitle">The Precision Atelier</div>
-              <div className="brand-subtitle-mini">Enterprise Console</div>
+              <div className="brand-subtitle-mini">Enterprise <span style={{ color: '#2f6be8' }}>Console</span></div>
             </div>
           </div>
 
@@ -111,7 +173,9 @@ function App() {
         {/* Top Navigation */}
         <header className="top-nav">
           <div className="header-brand">
-            <h1 className="brand-title" style={{ margin: 0 }}>Console</h1>
+            <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
+              <h1 className="brand-title" style={{ margin: 0, color: 'inherit' }}>Console</h1>
+            </a>
           </div>
 
           <div className="top-nav-links">
@@ -134,7 +198,7 @@ function App() {
             {/* Hero text content — z-index above all wave layers */}
             <div className="hero-content">
               <h1 className="hero-title">
-                Console: Elevating Technology from <span className="highlight">Learners to Entrepreneurs.</span>
+                <span style={{ color: '#2f6be8' }}>Console</span>: Elevating Technology from <span className="highlight">Learners to Entrepreneurs.</span>
               </h1>
               <p className="hero-description">
                 The architect's choice for digital production. From fundamental curriculum to enterprise-grade infrastructure, we provide the tools to build the future.
@@ -203,6 +267,45 @@ function App() {
           </div>
         </section>
 
+        {/* Testimonials / Partners Section */}
+        <section className="carousel-section" style={{ backgroundColor: '#f9fafb', borderTop: '1px solid #ebebed', borderBottom: '1px solid #ebebed' }}>
+          <div className="carousel-header">
+            <div>
+              <div className="section-label" style={{ color: '#2f6be8' }}>What Our Partners Say</div>
+              <h2 className="section-title" style={{ marginBottom: 0 }}>Trusted by Visionaries</h2>
+            </div>
+          </div>
+
+          <div className="carousel-track" ref={reviewCarouselRef}>
+            {reviews.map((rev, i) => (
+              <div key={i} className="review-card">
+                <div className="review-header">
+                  <img src={rev.avatar} alt={rev.name} className="review-avatar" />
+                  <div className="review-meta">
+                    <h4>{rev.name}</h4>
+                    <span>{rev.role}</span>
+                  </div>
+                </div>
+                <div className="review-rating">
+                  {[...Array(5)].map((_, idx) => (
+                    <Star key={idx} size={16} fill={idx < rev.rating ? "#f59e0b" : "transparent"} color={idx < rev.rating ? "#f59e0b" : "#d1d5db"} />
+                  ))}
+                </div>
+                <p className="review-text">"{rev.text}"</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="carousel-controls">
+            <button className="carousel-btn" onClick={() => scrollReviews(-1)}>
+              <ChevronLeft size={20} />
+            </button>
+            <button className="carousel-btn" onClick={() => scrollReviews(1)}>
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </section>
+
         {/* Learning Platform Section */}
         <section className="section-wrapper">
           <div className="section-label red">Learning Platform</div>
@@ -210,7 +313,7 @@ function App() {
 
           <div className="learning-layout">
             <div className="learning-content">
-              <p>Bridge the gap between theory and industry. Our proprietary curriculum tracks your growth in real-time as you master the Console ecosystem.</p>
+              <p>Bridge the gap between theory and industry. Our proprietary curriculum tracks your growth in real-time as you master the <span style={{ color: '#2f6be8', fontWeight: 600 }}>Console</span> ecosystem.</p>
 
               <div className="progress-card">
                 <div className="progress-header">
@@ -250,10 +353,10 @@ function App() {
               <div className="tool-icon">
                 <Terminal size={20} />
               </div>
-              <h4>Console CLI</h4>
+              <h4><span style={{ color: '#2f6be8' }}>Console</span> CLI</h4>
               <p>Unified command line interface for global deployments and resource management.</p>
               <div className="tool-footer">
-                <div className="code-snippet">$ console deploy --prod</div>
+                <div className="code-snippet">$ <span style={{ color: '#2f6be8' }}>console</span> deploy --prod</div>
               </div>
             </div>
 
@@ -304,6 +407,43 @@ function App() {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className="section-wrapper" style={{ backgroundColor: '#ffffff' }}>
+          <div className="section-label">Support & Resources</div>
+          <h2 className="section-title">Frequently Asked Questions</h2>
+          <div className="faq-container">
+            {faqs.map((faq, index) => (
+              <div 
+                key={index} 
+                className={`faq-item ${openFaq === index ? 'active' : ''}`}
+              >
+                <div 
+                  className="faq-question"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                >
+                  {faq.question}
+                  <ChevronDown className={`faq-icon ${openFaq === index ? 'rotate' : ''}`} size={20} />
+                </div>
+                {openFaq === index && (
+                  <div className="faq-answer">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center' }}>
+            <button 
+              className="btn-primary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 2rem', fontSize: '1rem', borderRadius: '2rem', boxShadow: '0 4px 14px rgba(47, 107, 232, 0.25)' }}
+              onClick={() => setIsQueryModalOpen(true)}
+            >
+              <MessageSquare size={18} /> Ask a Question
+            </button>
+          </div>
+        </section>
+
         {/* Live Supabase Data Section */}
         {todos.length > 0 && (
           <section className="section-wrapper" style={{ paddingBottom: '2rem' }}>
@@ -329,9 +469,37 @@ function App() {
             <a href="#" className="footer-link">Status</a>
           </div>
           <div className="footer-copyright">
-            © 2024 CONSOLE IT SOLUTIONS. ARCHITECTING THE DIGITAL FUTURE.
+            © 2024 <span style={{ color: '#2f6be8' }}>CONSOLE</span> IT SOLUTIONS. ARCHITECTING THE DIGITAL FUTURE.
           </div>
         </footer>
+
+        {/* Support Query Modal */}
+        {isQueryModalOpen && (
+          <div className="modal-overlay" onClick={() => setIsQueryModalOpen(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Submit a Query</h3>
+                <button className="modal-close" onClick={() => setIsQueryModalOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <p>Have a question that's not answered in the FAQ? Send it directly to our support team.</p>
+                <form onSubmit={(e) => { e.preventDefault(); setIsQueryModalOpen(false); alert("Your query has been sent to our team!"); }}>
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="you@company.com" required className="form-input" />
+                  </div>
+                  <div className="form-group">
+                    <label>Your Question</label>
+                    <textarea placeholder="How can we help?" rows="4" required className="form-input"></textarea>
+                  </div>
+                  <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem' }}>Send Message</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
     </div>
