@@ -1,0 +1,173 @@
+import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { supabase } from './utils/supabase';
+import './SignIn.css';
+
+export default function SignIn({ setActivePage }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrorMsg(error.message);
+    } else {
+      setSuccessMsg("Welcome back!");
+      // Example transition to dashboard: setTimeout(() => setActivePage('dashboard'), 1000);
+      setActivePage('home'); // temporary target until dashboard exists
+    }
+  };
+
+  return (
+    <div className="signin-page">
+      {/* Top Navbar - brand only */}
+      <header className="signin-navbar">
+        <div className="signin-navbar-brand" onClick={() => setActivePage('home')}>Console</div>
+      </header>
+
+      {/* Main Card */}
+      <main className="signin-main">
+
+        {/* Decorative Background Waves */}
+        <div className="signin-waves" aria-hidden="true">
+          <svg className="signin-wave signin-wave-1" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <path fill="#e8eaed" fillOpacity="0.6"
+              d="M0,192L60,181.3C120,171,240,149,360,154.7C480,160,600,192,720,202.7C840,213,960,203,1080,186.7C1200,171,1320,149,1380,138.7L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
+          </svg>
+          <svg className="signin-wave signin-wave-2" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <path fill="#dde0e5" fillOpacity="0.45"
+              d="M0,256L80,240C160,224,320,192,480,181.3C640,171,800,181,960,197.3C1120,213,1280,235,1360,245.3L1440,256L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z" />
+          </svg>
+          <svg className="signin-wave signin-wave-3" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <path fill="#d1d5db" fillOpacity="0.3"
+              d="M0,288L120,272C240,256,480,224,720,218.7C960,213,1200,235,1320,245.3L1440,256L1440,320L1320,320C1200,320,960,320,720,320C480,320,240,320,120,320L0,320Z" />
+          </svg>
+        </div>
+
+        <div className="signin-card">
+          {/* Left Panel */}
+          <div className="signin-left">
+            <div className="signin-left-content">
+              <h1 className="signin-heading">Welcome back.</h1>
+              <p className="signin-subtext">
+                Access your architectural interface and command your digital infrastructure with precision.
+              </p>
+
+              <div className="signin-oauth-btns">
+                <button className="oauth-btn" onClick={() => setActivePage('notfound')}>
+                  <span className="oauth-icon google-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  </span>
+                  Continue with Google
+                </button>
+
+                <button className="oauth-btn" onClick={() => setActivePage('notfound')}>
+                  <span className="oauth-icon github-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                    </svg>
+                  </span>
+                  Continue with GitHub
+                </button>
+              </div>
+            </div>
+
+            <p className="signin-create-account">
+              New to the platform?{' '}
+              <span className="signin-create-link" onClick={() => setActivePage('notfound')}>Create an Account</span>
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="signin-divider"></div>
+
+          {/* Right Panel */}
+          <div className="signin-right">
+            {(errorMsg || successMsg) && (
+              <div className={`gs-alert ${errorMsg ? 'gs-alert-error' : 'gs-alert-success'}`} style={{ marginBottom: '1.5rem' }}>
+                {errorMsg || successMsg}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="signin-form">
+              <div className="signin-field">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="signin-field">
+                <div className="signin-field-row">
+                  <label>Password</label>
+                  <span className="forgot-password" onClick={() => setActivePage('notfound')}>Forgot Password?</span>
+                </div>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <label className="signin-remember">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Keep me signed in for 30 days</span>
+              </label>
+
+              <button type="submit" className="signin-submit-btn" disabled={loading}>
+                {loading ? <Loader2 size={16} className="gs-spin" /> : 'Sign In'}
+              </button>
+
+              <div className="signin-encrypted">
+                <div className="encrypted-line"></div>
+                <span>ENCRYPTED CONNECTION</span>
+                <div className="encrypted-line"></div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="signin-footer">
+        <span className="signin-footer-brand" onClick={() => setActivePage('home')}>Console</span>
+        <div className="signin-footer-links">
+          {['Privacy Policy', 'Terms of Service', 'Security', 'Status'].map((l) => (
+            <a key={l} href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>{l}</a>
+          ))}
+        </div>
+        <span className="signin-footer-copy">© 2024 Console Architectural Interface. All rights reserved.</span>
+      </footer>
+    </div>
+  );
+}

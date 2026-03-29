@@ -4,6 +4,9 @@ import Solutions from './Solutions';
 import NotFound from './NotFound';
 import Resources from './Resources';
 import Documentation from './Documentation';
+import SignIn from './SignIn';
+import GetStarted from './GetStarted';
+import UserDashboard from './UserDashboard';
 import './App.css';
 import {
   LayoutDashboard,
@@ -100,6 +103,7 @@ function App() {
   const [openFaq, setOpenFaq] = useState(null);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
+  const [session, setSession] = useState(null);
   const reviewCarouselRef = useRef(null);
 
   const scrollReviews = (direction) => {
@@ -118,6 +122,18 @@ function App() {
     }
 
     getTodos();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const carouselRef = useRef(null);
@@ -190,8 +206,8 @@ function App() {
       {/* Main Content */}
       <main className="main-content">
 
-        {/* Top Navigation — hidden on Documentation page (has its own header) */}
-        {activePage !== 'documentation' && (
+        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, and UserDashboard pages */}
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
@@ -205,10 +221,34 @@ function App() {
               <span className={`top-nav-link ${activePage === 'resources' ? 'active' : ''}`} onClick={() => setActivePage('resources')}>Resources</span>
             </div>
 
-            <div className="top-nav-actions">
-              <button className="btn-signin" onClick={() => setActivePage('notfound')}>Sign In</button>
-              <button className="btn-primary" onClick={() => setActivePage('notfound')}>Get Started</button>
-            </div>
+            {!session ? (
+              <div className="top-nav-actions">
+                <button className="btn-signin" onClick={() => setActivePage('signin')}>Sign In</button>
+                <button className="btn-primary" onClick={() => setActivePage('getstarted')}>Get Started</button>
+              </div>
+            ) : (
+              <div className="top-nav-user-container">
+                <div className="top-nav-user-profile">
+                  <div className="user-avatar-icon">
+                    {session.user?.user_metadata?.first_name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="user-fullname-text">
+                    {session.user?.user_metadata?.first_name || session.user?.email?.split('@')[0]} {session.user?.user_metadata?.last_name || ''}
+                  </span>
+                </div>
+                <div className="top-nav-dropdown">
+                  <button className="dropdown-item" onClick={() => setActivePage('userdashboard')}>
+                    Manage Dashboard
+                  </button>
+                  <button className="dropdown-item logout" onClick={async () => {
+                    await supabase.auth.signOut();
+                    setActivePage('home');
+                  }}>
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </header>
         )}
 
@@ -488,7 +528,13 @@ function App() {
         ) : activePage === 'resources' ? (
           <Resources setActivePage={setActivePage} />
         ) : activePage === 'documentation' ? (
-          <Documentation setActivePage={setActivePage} />
+          <Documentation setActivePage={setActivePage} setIsQueryModalOpen={setIsQueryModalOpen} />
+        ) : activePage === 'signin' ? (
+          <SignIn setActivePage={setActivePage} />
+        ) : activePage === 'getstarted' ? (
+          <GetStarted setActivePage={setActivePage} />
+        ) : activePage === 'userdashboard' ? (
+          <UserDashboard session={session} setActivePage={setActivePage} />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}

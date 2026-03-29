@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   FileText, Shield, Lock, Archive, Eye,
   Download, Printer, Link2, Search, CheckCircle2,
-  Info, ChevronRight, X, ExternalLink, Database
+  Info, ChevronRight, ExternalLink, Database
 } from 'lucide-react';
 import './Documentation.css';
 
@@ -15,7 +15,7 @@ const sidebarItems = [
   { id: 'archive', label: 'Archive', icon: <Archive size={15} /> },
 ];
 
-const topNavItems = ['Documentation', 'Compliance', 'Security', 'Privacy', 'Terms'];
+const topNavItems = ['Home', 'Documentation', 'Compliance', 'Security', 'Privacy', 'Terms'];
 
 const sections = [
   {
@@ -43,7 +43,7 @@ const sections = [
   }
 ];
 
-export default function Documentation({ setActivePage }) {
+export default function Documentation({ setActivePage, setIsQueryModalOpen }) {
   const [activeNav, setActiveNav] = useState('Compliance');
   const [activeSidebar, setActiveSidebar] = useState('user-agreements');
   const [searchVal, setSearchVal] = useState('');
@@ -58,7 +58,13 @@ export default function Documentation({ setActivePage }) {
             <span
               key={item}
               className={`docs-topnav-item ${activeNav === item ? 'active' : ''}`}
-              onClick={() => setActiveNav(item)}
+              onClick={() => {
+                if (item === 'Home') {
+                  setActivePage('home');
+                } else {
+                  setActiveNav(item);
+                }
+              }}
             >
               {item}
             </span>
@@ -247,9 +253,11 @@ export default function Documentation({ setActivePage }) {
           <span>© 2024 Console IT. All rights reserved. Professional Legal Services.</span>
         </div>
         <div className="docs-footer-links">
-          {['Privacy Policy', 'Cookies', 'Status', 'Support', 'System Status'].map((l) => (
+          {['Privacy Policy', 'Cookies', 'Status'].map((l) => (
             <a key={l} href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>{l}</a>
           ))}
+          <a href="#" onClick={(e) => { e.preventDefault(); setIsQueryModalOpen(true); }}>Support</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>System Status</a>
           <span className="docs-footer-icons">
             <ExternalLink size={14} />
             <Shield size={14} />
