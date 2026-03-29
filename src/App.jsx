@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './utils/supabase';
+import Solutions from './Solutions';
+import NotFound from './NotFound';
+import Resources from './Resources';
+import Documentation from './Documentation';
 import './App.css';
 import {
   LayoutDashboard,
@@ -76,10 +80,26 @@ const faqs = [
 ];
 
 function App() {
+  const [activePage, _setActivePage] = useState(() => sessionStorage.getItem('console_activePage') || 'home');
+  const [previousPage, setPreviousPage] = useState(() => sessionStorage.getItem('console_previousPage') || 'home');
+
+  const setActivePage = (pageStr) => {
+    if (activePage !== 'notfound' && pageStr === 'notfound') {
+      setPreviousPage(activePage);
+      sessionStorage.setItem('console_previousPage', activePage);
+    } else if (activePage !== 'notfound' && activePage !== pageStr) {
+      setPreviousPage(activePage);
+      sessionStorage.setItem('console_previousPage', activePage);
+    }
+    _setActivePage(pageStr);
+    sessionStorage.setItem('console_activePage', pageStr);
+  };
+
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [todos, setTodos] = useState([]);
   const [openFaq, setOpenFaq] = useState(null);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
+  const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
   const reviewCarouselRef = useRef(null);
 
   const scrollReviews = (direction) => {
@@ -170,29 +190,32 @@ function App() {
       {/* Main Content */}
       <main className="main-content">
 
-        {/* Top Navigation */}
-        <header className="top-nav">
-          <div className="header-brand">
-            <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
-              <h1 className="brand-title" style={{ margin: 0, color: 'inherit' }}>Console</h1>
-            </a>
-          </div>
+        {/* Top Navigation — hidden on Documentation page (has its own header) */}
+        {activePage !== 'documentation' && (
+          <header className="top-nav">
+            <div className="header-brand">
+              <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
+                <h1 className="brand-title" style={{ margin: 0, color: 'inherit' }}>Console</h1>
+              </a>
+            </div>
 
-          <div className="top-nav-links">
-            <span className="top-nav-link active">Platform</span>
-            <span className="top-nav-link">Solutions</span>
-            <span className="top-nav-link">Learning</span>
-            <span className="top-nav-link">Documentation</span>
-          </div>
+            <div className="top-nav-links">
+              <span className={`top-nav-link ${activePage === 'home' ? 'active' : ''}`} onClick={() => setActivePage('home')}>Platform</span>
+              <span className={`top-nav-link ${activePage === 'solutions' ? 'active' : ''}`} onClick={() => setActivePage('solutions')}>Solutions</span>
+              <span className={`top-nav-link ${activePage === 'resources' ? 'active' : ''}`} onClick={() => setActivePage('resources')}>Resources</span>
+            </div>
 
-          <div className="top-nav-actions">
-            <button className="btn-signin">Sign In</button>
-            <button className="btn-primary">Get Started</button>
-          </div>
-        </header>
+            <div className="top-nav-actions">
+              <button className="btn-signin" onClick={() => setActivePage('notfound')}>Sign In</button>
+              <button className="btn-primary" onClick={() => setActivePage('notfound')}>Get Started</button>
+            </div>
+          </header>
+        )}
 
-        {/* Hero Section */}
-        <section className="hero-section">
+        {activePage === 'home' ? (
+          <>
+            {/* Hero Section */}
+            <section className="hero-section">
           {/* Flex container to place hero text to the left and search bar to the right */}
           <div className="hero-container">
             {/* Hero text content — z-index above all wave layers */}
@@ -204,8 +227,8 @@ function App() {
                 The architect's choice for digital production. From fundamental curriculum to enterprise-grade infrastructure, we provide the tools to build the future.
               </p>
               <div className="hero-actions">
-                <button className="btn-primary">Start Building</button>
-                <button className="btn-secondary">View Platform Docs</button>
+                <button className="btn-primary" onClick={() => setActivePage('notfound')}>Start Building</button>
+                <button className="btn-secondary" onClick={() => setActivePage('notfound')}>View Platform Docs</button>
               </div>
             </div>
 
@@ -216,8 +239,8 @@ function App() {
                 <input type="text" placeholder="Search you Dreams .........................!" />
               </div>
               <div className="floating-actions">
-                <button><Plus size={20} color="#2f6be8" /></button>
-                <button><Bell size={20} color="#6b7280" /></button>
+                <button onClick={() => setActivePage('notfound')}><Plus size={20} color="#2f6be8" /></button>
+                <button onClick={() => setActivePage('notfound')}><Bell size={20} color="#6b7280" /></button>
                 <div className="avatar-small">AM</div>
               </div>
             </div>
@@ -250,7 +273,7 @@ function App() {
                 <div className="icon-box">{cat.icon}</div>
                 <h3>{cat.name}</h3>
                 <p>{cat.desc}</p>
-                <a href="#" className="card-link">
+                <a href="#" className="card-link" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>
                   Explore <ArrowRight size={14} />
                 </a>
               </div>
@@ -459,19 +482,63 @@ function App() {
             </div>
           </section>
         )}
+        </>
+        ) : activePage === 'solutions' ? (
+          <Solutions setActivePage={setActivePage} />
+        ) : activePage === 'resources' ? (
+          <Resources setActivePage={setActivePage} />
+        ) : activePage === 'documentation' ? (
+          <Documentation setActivePage={setActivePage} />
+        ) : (
+          <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
+        )}
 
-        {/* Footer */}
-        <footer className="footer">
-          <div className="footer-links">
-            <a href="#" className="footer-link">Privacy Policy</a>
-            <a href="#" className="footer-link">Terms of Service</a>
-            <a href="#" className="footer-link">Security</a>
-            <a href="#" className="footer-link">Status</a>
-          </div>
-          <div className="footer-copyright">
-            © 2024 <span style={{ color: '#2f6be8' }}>CONSOLE</span> IT SOLUTIONS. ARCHITECTING THE DIGITAL FUTURE.
-          </div>
-        </footer>
+        {/* Extended Home Footer */}
+        {activePage === 'home' && (
+          <footer className="home-large-footer">
+            <div className="footer-top-row">
+              <div className="footer-brand-col">
+                <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
+                  <h2 className="brand-title" style={{ margin: '0 0 1rem 0', color: 'inherit', fontSize: '1.85rem' }}>Console</h2>
+                </a>
+                <p className="footer-tagline">
+                  Precision-engineered IT solutions for the modern digital workspace. Our platform is built on the architecture that powers Fortune 500 Infrastructure.
+                </p>
+              </div>
+              <div className="footer-links-grid">
+                <div className="footer-col">
+                  <h4>Navigate</h4>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('home'); }}>Platform</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('solutions'); }}>Solutions</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('resources'); }}>Resources</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsLearningModalOpen(true); }}>Learning</a>
+                </div>
+                <div className="footer-col">
+                  <h4>Support</h4>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('documentation'); }}>Documentation</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsQueryModalOpen(true); }}>Contact Support</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>Help Center</a>
+                </div>
+                <div className="footer-col">
+                  <h4>Legal</h4>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>Privacy Policy</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>Terms of Service</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>Security</a>
+                </div>
+              </div>
+            </div>
+            <div className="footer-bottom-row">
+              <div className="footer-copyright">
+                © 2024 Console IT. All rights reserved.
+              </div>
+              <div className="footer-status-links">
+                <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>System Status</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>GitHub</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>LinkedIn</a>
+              </div>
+            </div>
+          </footer>
+        )}
 
         {/* Support Query Modal */}
         {isQueryModalOpen && (
@@ -496,6 +563,43 @@ function App() {
                   </div>
                   <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem' }}>Send Message</button>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Learning Redirect Modal */}
+        {isLearningModalOpen && (
+          <div className="modal-overlay" onClick={() => setIsLearningModalOpen(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+              <div className="modal-header">
+                <h3>Learners Dashboard</h3>
+                <button className="modal-close" onClick={() => setIsLearningModalOpen(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body" style={{ textAlign: 'center', padding: '2.5rem 1.5rem 1.5rem' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '70px', height: '70px', borderRadius: '50%', backgroundColor: '#eff6ff', marginBottom: '1.5rem' }}>
+                  <GraduationCap size={36} color="#2f6be8" />
+                </div>
+                <h4 style={{ fontSize: '1.25rem', color: '#0d0f12', marginBottom: '1rem', fontWeight: 700 }}>Enter Learning Hub</h4>
+                <p style={{ fontSize: '1rem', color: '#4b5563', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+                  You are about to leave the main Platform console and securely switch over to your dedicated <b>Learners Dashboard</b>. Do you wish to proceed?
+                </p>
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                  <button className="btn-secondary" onClick={() => setIsLearningModalOpen(false)} style={{ padding: '0.85rem', flex: 1, borderRadius: '0.5rem' }}>Cancel</button>
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => {
+                      setIsLearningModalOpen(false);
+                      // Fallback redirect for the Learning dashboard (modify URL as needed)
+                      window.open('http://localhost:5174/', '_blank'); 
+                    }}
+                    style={{ padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1, borderRadius: '0.5rem' }}
+                  >
+                    Proceed <ArrowRight size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

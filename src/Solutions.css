@@ -1,0 +1,132 @@
+.solutions-page {
+  padding: 4rem max(3rem, 8vw) 8rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.solutions-hero {
+  max-width: 800px;
+  margin-bottom: 5rem;
+}
+
+.solutions-hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.solutions-hero-desc {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.solutions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+}
+
+.solution-block {
+  display: flex;
+  align-items: center;
+  gap: 6rem;
+  flex-wrap: wrap;
+}
+
+.solution-block.reverse {
+  flex-direction: row-reverse;
+}
+
+.solution-image-container {
+  flex: 1;
+  min-width: 300px;
+  height: 480px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.solution-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: 
+    radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 10px);
+}
+
+.solution-image-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.solution-content {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.solution-category {
+  color: #2f6be8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.solution-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+}
+
+.solution-description {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.solution-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.75rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+  .solution-block, .solution-block.reverse {
+    flex-direction: column !important;
+    gap: 3rem;
+  }
+  
+  .solution-image-container {
+    width: 100%;
+    height: 350px;
+  }
+  
+  .solutions-hero-title {
+    font-size: 2.5rem;
+  }
+}
