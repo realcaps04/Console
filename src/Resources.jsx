@@ -8,12 +8,17 @@ import {
   ArrowRight,
   BookOpen,
   LifeBuoy,
-  History
+  History,
+  X,
+  Unlock, FileArchive, FileImage, Layers,
+  Scissors, ImageOff, Replace, Copy,
+  BadgeDollarSign, Binary, Ruler, Radical
 } from 'lucide-react';
 import './Resources.css';
 
 export default function Resources({ setActivePage }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeModal, setActiveModal] = useState(null);
 
   const tools = [
     {
@@ -21,21 +26,39 @@ export default function Resources({ setActivePage }) {
       title: "PDF Management",
       icon: <FileText size={20} color="#2f6be8" />,
       desc: "Advanced cryptographic encryption and lossless merging protocols for professional document handling.",
-      iconBg: "#eff6ff"
+      iconBg: "#eff6ff",
+      subTools: [
+        { name: "PDF Unlock", icon: <Unlock size={16} /> },
+        { name: "PDF Compressor", icon: <FileArchive size={16} /> },
+        { name: "PDF to Image", icon: <FileImage size={16} /> },
+        { name: "Merge PDFs", icon: <Layers size={16} /> }
+      ]
     },
     {
       id: 2,
       title: "Image Suite",
       icon: <ImageIcon size={20} color="#2f6be8" />,
       desc: "Batch processing engine with neural web-optimization and intelligent focal cropping capabilities.",
-      iconBg: "#eff6ff"
+      iconBg: "#eff6ff",
+      subTools: [
+        { name: "Image Compressor", icon: <FileArchive size={16} /> },
+        { name: "Background Remover", icon: <ImageOff size={16} /> },
+        { name: "Format Converter", icon: <Replace size={16} /> },
+        { name: "Resize Editor", icon: <Scissors size={16} /> }
+      ]
     },
     {
       id: 3,
       title: "Calculators",
       icon: <Calculator size={20} color="#2f6be8" />,
       desc: "High-precision engineering units and complex financial modeling modules for technical accuracy.",
-      iconBg: "#eff6ff"
+      iconBg: "#eff6ff",
+      subTools: [
+        { name: "Financial Modeler", icon: <BadgeDollarSign size={16} /> },
+        { name: "Scientific Calculator", icon: <Radical size={16} /> },
+        { name: "Unit Converter", icon: <Ruler size={16} /> },
+        { name: "Hex Converter", icon: <Binary size={16} /> }
+      ]
     }
   ];
 
@@ -74,7 +97,7 @@ export default function Resources({ setActivePage }) {
             <h3 className="resource-card-title">{tool.title}</h3>
             <p className="resource-card-desc">{tool.desc}</p>
             
-            <button className="btn-secondary resource-card-btn" onClick={() => setActivePage('notfound')}>
+            <button className="btn-secondary resource-card-btn" onClick={() => setActiveModal(tool)}>
               Launch Tool
             </button>
           </div>
@@ -126,6 +149,37 @@ export default function Resources({ setActivePage }) {
         </div>
 
       </div>
+
+      {activeModal && (
+        <div className="res-modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="res-modal" onClick={e => e.stopPropagation()}>
+            <div className="res-modal-header">
+              <div className="res-modal-title-box">
+                <div className="res-modal-icon" style={{ backgroundColor: activeModal.iconBg }}>
+                  {activeModal.icon}
+                </div>
+                <h2>{activeModal.title}</h2>
+              </div>
+              <button className="res-modal-close" onClick={() => setActiveModal(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <p className="res-modal-desc">Select a specific utility from the {activeModal.title} suite to initiate its workspace interface.</p>
+            
+            <div className="res-modal-grid">
+              {activeModal.subTools.map((sub, idx) => (
+                <div key={idx} className="res-subtool-card">
+                  <div className="res-subtool-icon">{sub.icon}</div>
+                  <span className="res-subtool-name">{sub.name}</span>
+                  <button className="res-subtool-btn" onClick={() => setActivePage('notfound')}>Open</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

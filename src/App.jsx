@@ -7,6 +7,8 @@ import Documentation from './Documentation';
 import SignIn from './SignIn';
 import GetStarted from './GetStarted';
 import UserDashboard from './UserDashboard';
+import Jobs from './Jobs';
+import OpenPositions from './OpenPositions';
 import './App.css';
 import {
   LayoutDashboard,
@@ -206,8 +208,8 @@ function App() {
       {/* Main Content */}
       <main className="main-content">
 
-        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, and UserDashboard pages */}
-        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && (
+        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard and OpenPositions pages */}
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
@@ -267,7 +269,7 @@ function App() {
                 The architect's choice for digital production. From fundamental curriculum to enterprise-grade infrastructure, we provide the tools to build the future.
               </p>
               <div className="hero-actions">
-                <button className="btn-primary" onClick={() => setActivePage('notfound')}>Start Building</button>
+                <button className="btn-primary" onClick={() => setActivePage(session ? 'userprojects' : 'getstarted')}>Start Building</button>
                 <button className="btn-secondary" onClick={() => setActivePage('notfound')}>View Platform Docs</button>
               </div>
             </div>
@@ -533,8 +535,14 @@ function App() {
           <SignIn setActivePage={setActivePage} />
         ) : activePage === 'getstarted' ? (
           <GetStarted setActivePage={setActivePage} />
+        ) : activePage === 'jobs' ? (
+          <Jobs setActivePage={setActivePage} />
+        ) : activePage === 'openpositions' ? (
+          <OpenPositions setActivePage={setActivePage} />
         ) : activePage === 'userdashboard' ? (
-          <UserDashboard session={session} setActivePage={setActivePage} />
+          <UserDashboard session={session} setActivePage={setActivePage} initialTab="overview" />
+        ) : activePage === 'userprojects' ? (
+          <UserDashboard session={session} setActivePage={setActivePage} initialTab="projects" />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}
@@ -558,6 +566,7 @@ function App() {
                   <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('solutions'); }}>Solutions</a>
                   <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('resources'); }}>Resources</a>
                   <a href="#" onClick={(e) => { e.preventDefault(); setIsLearningModalOpen(true); }}>Learning</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setActivePage('jobs'); }}>Jobs</a>
                 </div>
                 <div className="footer-col">
                   <h4>Support</h4>
