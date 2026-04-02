@@ -293,55 +293,6 @@ const LearnerRegistration = ({ setActivePage }) => {
 
     // Step 0: Authenticating Identity
     setTimeout(() => setStep(0, 'processing'), 600);
-    setTimeout(() => setStep(0, 'verified'),   1600);
-
-    // Step 1: Technical Proficiency
-    setTimeout(() => setStep(1, 'processing'), 1900);
-    setTimeout(() => setStep(1, 'verified'),   3000);
-
-    // Step 2: Custom Workspace
-    setTimeout(() => setStep(2, 'processing'), 3300);
-    setTimeout(() => setStep(2, 'verified'),   4400);
-
-    // Step 3: Finalizing Atelier — DB insert fires here
-    setTimeout(() => setStep(3, 'processing'), 4700);
-    setTimeout(async () => {
-      try {
-        const payload = {
-          first_name:    form.firstName.trim(),
-          last_name:     form.lastName.trim(),
-          email:         form.email.trim().toLowerCase(),
-          password_hash: form.password,
-          qualification: form.qualification,
-          primary_goal:  selectedGoal,
-          focus_areas:   selectedAreas,
-          agreed_terms:  form.agreed,
-          // created_at omitted — DB default now() handles it
-        };
-
-        const { error } = await supabase
-          .from('Learners')
-          .insert([payload]);
-
-        if (error) throw error;
-
-        setStep(3, 'verified');
-        setSubmitState('success');
-        // Wipe session so a reload starts fresh
-        ['lr_scene','lr_form','lr_goal','lr_areas','lr_maxStep']
-          .forEach(k => sessionStorage.removeItem(k));
-
-      } catch (err) {
-        console.error('[Learners] Registration error:', err);
-        setStep(3, 'error');
-        setSubmitError(friendlyError(err));
-        setSubmitState('error');
-      }
-    }, 5200);
-  };
-
-    // Step 0: Authenticating Identity
-    setTimeout(() => setStep(0, 'processing'), 600);
     setTimeout(() => setStep(0, 'verified'), 1600);
 
     // Step 1: Technical Proficiency
@@ -360,624 +311,635 @@ const LearnerRegistration = ({ setActivePage }) => {
           first_name: form.firstName.trim(),
           last_name: form.lastName.trim(),
           email: form.email.trim().toLowerCase(),
-          password_hash: form.password,          // ⚠ use Supabase Auth signUp() in production
+          password_hash: form.password,
           qualification: form.qualification,
           primary_goal: selectedGoal,
-          focus_areas: selectedAreas,          // text[] stored as Postgres array
+          focus_areas: selectedAreas,
           agreed_terms: form.agreed,
-          // created_at intentionally omitted — DB default now() handles it
+          // created_at omitted — DB default now() handles it
         };
 
         const { error } = await supabase
-          .from('Learners')                      // matches table name in SQL schema
+          .from('Learners')
           .insert([payload]);
 
         if (error) throw error;
 
         setStep(3, 'verified');
         setSubmitState('success');
-        // Wipe session so a reload starts fresh
-        ['lr_scene', 'lr_form', 'lr_goal', 'lr_areas', 'lr_maxStep']
+
+        // Persist learner identity for the dashboard
+        sessionStorage.setItem('ld_firstName', form.firstName.trim());
+        sessionStorage.setItem('ld_lastName',  form.lastName.trim());
+        sessionStorage.setItem('ld_email',     form.email.trim().toLowerCase());
+        sessionStorage.setItem('ld_goal',      selectedGoal);
+        sessionStorage.setItem('ld_areas',     JSON.stringify(selectedAreas));
+
+        // Wipe registration session keys
+        ['lr_scene','lr_form','lr_goal','lr_areas','lr_maxStep']
           .forEach(k => sessionStorage.removeItem(k));
+
       } catch (err) {
         console.error('[Learners] Registration error:', err);
         setStep(3, 'error');
-        setSubmitError(err.message || 'Registration failed. Please try again.');
+        setSubmitError(friendlyError(err));
         setSubmitState('error');
       }
     }, 5200);
   };
 
-  if (scene === 'paths' || scene === 'exiting') {
-    return (
-      <div className="lr-page">
-        <main className="lr-path-scene">
-          <div className="lr-path-intro">
-            <span className="lr-path-eyebrow">console learning</span>
-            <h1 className="lr-path-heading">Choose Your Starting Point</h1>
-            <p className="lr-path-sub">
-              Your journey is structured into three milestones. Begin with step one to unlock the full experience.
-            </p>
-          </div>
 
-          <div className={`lr-path-grid ${scene === 'exiting' ? 'lr-path-grid--exit' : ''}`}>
-            {PATHS.map((path, i) => (
-              <div
-                key={path.id}
-                className={`lr-path-card lr-path-card--${i + 1} ${path.disabled ? 'lr-path-card--disabled' : ''} ${path.resumable ? 'lr-path-card--resumable' : ''} ${scene === 'exiting' && !path.disabled ? 'lr-path-card--selected' : ''}`}
-                style={{ '--accent': path.accent, '--accent-light': path.accentLight, animationDelay: `${i * 0.12}s` }}
-                onClick={() => handlePathClick(path)}
-              >
-                {path.badge
-                  ? <div className="lr-path-pending-pill">{path.badge}</div>
-                  : <div className="lr-path-badge">{path.id}</div>}
 
-                <div className="lr-path-icon" style={{ background: path.accentLight, color: path.accent }}>{path.icon}</div>
-                <span className="lr-path-step-label">{path.label}</span>
-                <h3 className="lr-path-card-title">{path.title}</h3>
-                <p className="lr-path-card-desc">{path.desc}</p>
-
-                <button
-                  className="lr-path-cta"
-                  style={path.disabled
-                    ? (path.resumable ? { background: path.accentLight, color: path.accent, border: `1.5px solid ${path.accent}` } : {})
-                    : { background: path.accent, color: '#fff' }}
-                  disabled={path.disabled}
-                >
-                  {path.cta}
-                  {!path.disabled && (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  )}
-                </button>
-
-                {path.disabled && !path.resumable && <div className="lr-path-lock">🔒 Complete step {path.id - 1} first</div>}
-                {path.resumable && <div className="lr-path-lock" style={{ color: path.accent }}>⚠️ Draft saved — sign in to continue</div>}
-              </div>
-            ))}
-          </div>
-
-          <div className="lr-path-steps-indicator">
-            {PATHS.map((p) => <div key={p.id} className={`lr-dot ${p.id === 1 ? 'lr-dot--active' : ''}`} />)}
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  /* ══════════════════════════════
-     SCENE B: Profile form (+ flip wrapper)
-  ══════════════════════════════ */
-  if (scene === 'form' || scene === 'flipping') {
-    return (
-      <div className="lr-page">
-        <Stepper activeStep={1} />
-
-        <main className={`lr-main ${scene === 'form' ? 'lr-main--animated' : ''}`}>
-          <div className={`lr-flip-wrapper ${scene === 'flipping' ? 'lr-flip-wrapper--flipping' : ''}`}>
-            <div className="lr-card">
-              <h2 className="lr-title">Begin Your Journey</h2>
-              <p className="lr-subtitle">
-                Create your professional profile to unlock personalized learning pathways tailored to your career aspirations.
-              </p>
-
-              <form className="lr-form" onSubmit={handleFormSubmit}>
-                <div className="lr-row">
-                  <div className="lr-field">
-                    <label htmlFor="lr-fname">FIRST NAME</label>
-                    <input
-                      id="lr-fname" name="firstName" type="text" placeholder="e.g., Alexander"
-                      value={form.firstName} onChange={handle}
-                      className={errors.firstName ? 'lr-input-error' : ''}
-                    />
-                    {errors.firstName && <span className="lr-field-error">{errors.firstName}</span>}
-                  </div>
-                  <div className="lr-field">
-                    <label htmlFor="lr-lname">LAST NAME</label>
-                    <input
-                      id="lr-lname" name="lastName" type="text" placeholder="e.g., Hamilton"
-                      value={form.lastName} onChange={handle}
-                      className={errors.lastName ? 'lr-input-error' : ''}
-                    />
-                    {errors.lastName && <span className="lr-field-error">{errors.lastName}</span>}
-                  </div>
-                </div>
-
-                <div className="lr-field lr-field--full">
-                  <label htmlFor="lr-email">EMAIL ADDRESS</label>
-                  <input
-                    id="lr-email" name="email" type="email" placeholder="alexander@console.io"
-                    value={form.email} onChange={handle}
-                    className={errors.email ? 'lr-input-error' : ''}
-                  />
-                  {errors.email && <span className="lr-field-error">{errors.email}</span>}
-                </div>
-
-                <div className="lr-row">
-                  <div className="lr-field">
-                    <label htmlFor="lr-pw">PASSWORD</label>
-                    <input
-                      id="lr-pw" name="password" type="password" placeholder="••••••••"
-                      value={form.password} onChange={handle}
-                      className={errors.password ? 'lr-input-error' : ''}
-                    />
-                    {errors.password && <span className="lr-field-error">{errors.password}</span>}
-                  </div>
-                  <div className="lr-field">
-                    <label htmlFor="lr-cpw">CONFIRM PASSWORD</label>
-                    <input
-                      id="lr-cpw" name="confirmPassword" type="password" placeholder="••••••••"
-                      value={form.confirmPassword} onChange={handle}
-                      className={errors.confirmPassword ? 'lr-input-error' : ''}
-                    />
-                    {errors.confirmPassword && <span className="lr-field-error">{errors.confirmPassword}</span>}
-                  </div>
-                </div>
-
-                <div className="lr-field lr-field--full">
-                  <label>MAXIMUM EDUCATIONAL QUALIFICATION</label>
-                  <div
-                    className={`lr-custom-select ${dropdownOpen ? 'lr-custom-select--open' : ''} ${errors.qualification ? 'lr-custom-select--error' : ''}`}
-                    onClick={() => setDropdownOpen((o) => !o)}
-                    onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
-                    tabIndex={0}
-                  >
-                    <span className={`lr-custom-select__value ${!selectedQual ? 'lr-custom-select__placeholder' : ''}`}>
-                      {selectedQual ? selectedQual.label : 'Select your highest degree'}
-                    </span>
-                    <span className="lr-custom-select__arrow">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </span>
-                    {dropdownOpen && (
-                      <ul className="lr-custom-select__menu" role="listbox">
-                        {QUALIFICATIONS.map((q) => (
-                          <li
-                            key={q.value}
-                            role="option"
-                            aria-selected={form.qualification === q.value}
-                            className={`lr-custom-select__option ${form.qualification === q.value ? 'lr-custom-select__option--active' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setForm((prev) => ({ ...prev, qualification: q.value }));
-                              setErrors((prev) => ({ ...prev, qualification: '' }));
-                              setDropdownOpen(false);
-                            }}
-                          >
-                            {q.label}
-                            {form.qualification === q.value && (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {errors.qualification && <span className="lr-field-error">{errors.qualification}</span>}
-                </div>
-
-                <label className="lr-checkbox">
-                  <input
-                    type="checkbox" name="agreed" checked={form.agreed}
-                    onChange={(e) => { handle(e); setErrors((prev) => ({ ...prev, agreed: '' })); }}
-                  />
-                  <span className={`lr-checkmark ${errors.agreed ? 'lr-checkmark--error' : ''}`} />
-                  <span className="lr-checkbox-text">
-                    I agree to the{' '}
-                    <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>{' '}
-                    and{' '}
-                    <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>{' '}
-                    regarding the collection and use of my professional data.
-                  </span>
-                </label>
-                {errors.agreed && <span className="lr-field-error" style={{ marginTop: '-0.75rem', marginBottom: '0.5rem' }}>{errors.agreed}</span>}
-
-                <div className="lr-actions">
-                  <p className="lr-signin-prompt">
-                    Already have an account?{' '}
-                    <span className="lr-signin-link" onClick={() => setActivePage('learnerlogin')}>Sign In</span>
-                  </p>
-                  <button type="submit" className="lr-submit-btn">Save &amp; Continue</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </main>
-
-        <footer className="lr-footer">
-          <p>© 2024 CONSOLE ARCHITECTURAL LEARNING SYSTEMS</p>
-        </footer>
-      </div>
-    );
-  }
-
-  /* ══════════════════════════════
-     SCENE C: Trajectory (+ flip-traj)
-  ══════════════════════════════ */
-  if (scene === 'trajectory' || scene === 'flipping-traj') {
-    return (
-      <div className="lr-page">
-        <Stepper activeStep={2} />
-        <main className={`lr-traj-main ${scene === 'flipping-traj' ? 'lr-traj-main--flipping' : ''}`}>
-          {/* Heading */}
-          <div className="lr-traj-hero">
-            <h1 className="lr-traj-title">Define Your Trajectory</h1>
-            <p className="lr-traj-sub">
-              Map your professional evolution. Our precision-guided curriculum adapts to your specific career milestones.
-            </p>
-          </div>
-
-          <div className="lr-traj-card">
-            {/* PRIMARY GOAL */}
-            <div className="lr-traj-section-label">
-              <div className="lr-traj-section-bar" />
-              <span>SELECT YOUR PRIMARY GOAL</span>
-            </div>
-
-            <div className="lr-goals-grid">
-              {GOALS.map((g) => (
-                <div
-                  key={g.id}
-                  className={`lr-goal-card ${selectedGoal === g.id ? 'lr-goal-card--active' : ''}`}
-                  onClick={() => setSelectedGoal(g.id)}
-                >
-                  {selectedGoal === g.id && (
-                    <div className="lr-goal-check">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className={`lr-goal-icon ${selectedGoal === g.id ? 'lr-goal-icon--active' : ''}`}>{g.icon}</div>
-                  <h4 className="lr-goal-title">{g.title}</h4>
-                  <p className="lr-goal-desc">{g.desc}</p>
-                </div>
-              ))}
-            </div>
-            {trajErrors.goal && <span className="lr-field-error" style={{ marginTop: '0.5rem' }}>{trajErrors.goal}</span>}
-
-            {/* FOCUS AREAS */}
-            <div className="lr-traj-section-label" style={{ marginTop: '2rem' }}>
-              <div className="lr-traj-section-bar" />
-              <span>FOCUS AREAS</span>
-            </div>
-
-            <div className={`lr-focus-box ${trajErrors.areas ? 'lr-focus-box--error' : ''}`}>
-              <p className="lr-focus-prompt">Select the technical domains that align with your trajectory objectives:</p>
-              <div className="lr-focus-tags">
-                {FOCUS_AREAS.map((area) => (
-                  <button
-                    key={area}
-                    className={`lr-focus-tag ${selectedAreas.includes(area) ? 'lr-focus-tag--active' : ''}`}
-                    onClick={() => toggleArea(area)}
-                    type="button"
-                  >
-                    {area}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {trajErrors.areas && <span className="lr-field-error" style={{ marginTop: '0.5rem' }}>{trajErrors.areas}</span>}
-          </div>
-
-          {/* Navigation */}
-          <div className="lr-traj-nav">
-            <button className="lr-traj-back" onClick={() => setScene('form')}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-              </svg>
-              Go Back
-            </button>
-            <button className="lr-traj-continue" onClick={handleTrajContinue}>
-              Continue to Review
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
-          </div>
-        </main>
-
-        <footer className="lr-footer lr-footer--light">
-          <div className="lr-footer-brand">
-            <span className="lr-footer-brand-name">Console Core</span>
-            <p className="lr-footer-copy-small">&copy; 2024 PRECISION IN INFRASTRUCTURE.</p>
-          </div>
-          <div className="lr-footer-links-row">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Security</a>
-            <a href="#">Status</a>
-            <a href="#">Contact</a>
-          </div>
-        </footer>
-      </div>
-    );
-  }
-
-  /* ══════════════════════════════
-     SCENE D: Review
-  ══════════════════════════════ */
-  const goalObj = GOALS.find((g) => g.id === selectedGoal);
-  const qualObj = QUALIFICATIONS.find((q) => q.value === form.qualification);
-  const qualLabel = qualObj ? qualObj.label.replace(/^.{2,4}\s+/, '') : '—';
-
+if (scene === 'paths' || scene === 'exiting') {
   return (
     <div className="lr-page">
-      <Stepper activeStep={3} />
+      <main className="lr-path-scene">
+        <div className="lr-path-intro">
+          <span className="lr-path-eyebrow">console learning</span>
+          <h1 className="lr-path-heading">Choose Your Starting Point</h1>
+          <p className="lr-path-sub">
+            Your journey is structured into three milestones. Begin with step one to unlock the full experience.
+          </p>
+        </div>
 
-      {/* ══ Validation Modal Overlay ══ */}
-      {showModal && (() => {
-        const VSTEPS = [
-          {
-            label: 'Authenticating Identity',
-            icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>),
-          },
-          {
-            label: 'Technical Proficiency',
-            icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /><path d="M4 6h.01" /><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /></svg>),
-          },
-          {
-            label: 'Custom Workspace',
-            icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>),
-          },
-          {
-            label: 'Finalizing Learner',
-            icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>),
-          },
-        ];
+        <div className={`lr-path-grid ${scene === 'exiting' ? 'lr-path-grid--exit' : ''}`}>
+          {PATHS.map((path, i) => (
+            <div
+              key={path.id}
+              className={`lr-path-card lr-path-card--${i + 1} ${path.disabled ? 'lr-path-card--disabled' : ''} ${path.resumable ? 'lr-path-card--resumable' : ''} ${scene === 'exiting' && !path.disabled ? 'lr-path-card--selected' : ''}`}
+              style={{ '--accent': path.accent, '--accent-light': path.accentLight, animationDelay: `${i * 0.12}s` }}
+              onClick={() => handlePathClick(path)}
+            >
+              {path.badge
+                ? <div className="lr-path-pending-pill">{path.badge}</div>
+                : <div className="lr-path-badge">{path.id}</div>}
 
-        const doneCount = stepStates.filter(s => s === 'verified').length;
-        const progressPct = (doneCount / STEP_COUNT) * 100;
+              <div className="lr-path-icon" style={{ background: path.accentLight, color: path.accent }}>{path.icon}</div>
+              <span className="lr-path-step-label">{path.label}</span>
+              <h3 className="lr-path-card-title">{path.title}</h3>
+              <p className="lr-path-card-desc">{path.desc}</p>
 
-        return (
-          <div className="lr-modal-overlay">
-            <div className="lr-modal-panel">
-              {/* Grid dot background */}
-              <div className="lr-modal-dots" />
-
-              {/* Central icon with circular progress ring */}
-              {(() => {
-                const R = 54;          // ring radius
-                const C = 2 * Math.PI * R;  // circumference ≈ 339.3
-                const offset = C - (progressPct / 100) * C;
-                const isProcessing = stepStates.some(s => s === 'processing');
-                const isDone = submitState === 'success';
-                return (
-                  <div className="lr-modal-icon-wrap">
-                    {/* SVG ring: track + progress arc + spin arc */}
-                    <svg
-                      className="lr-modal-ring-svg"
-                      width="120" height="120"
-                      viewBox="0 0 120 120"
-                      style={{ position: 'absolute', top: 0, left: 0 }}
-                    >
-                      {/* Track */}
-                      <circle cx="60" cy="60" r={R} fill="none" stroke="#e2e5f0" strokeWidth="4" />
-                      {/* Progress fill */}
-                      <circle
-                        cx="60" cy="60" r={R}
-                        fill="none"
-                        stroke="#3b5fe2"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeDasharray={C}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                        style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)' }}
-                      />
-                      {/* Spinning arc shown while any step is processing */}
-                      {isProcessing && !isDone && (
-                        <circle
-                          cx="60" cy="60" r={R}
-                          fill="none"
-                          stroke="#6979f8"
-                          strokeWidth="4"
-                          strokeLinecap="round"
-                          strokeDasharray={`${C * 0.18} ${C * 0.82}`}
-                          transform="rotate(-90 60 60)"
-                          className="lr-modal-spin-arc"
-                        />
-                      )}
-                    </svg>
-                    {/* Icon core */}
-                    <div className="lr-modal-icon-core">
-                      {isDone ? (
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b5fe2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      ) : (
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b5fe2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              <h2 className="lr-modal-title">Validating Your Blueprint</h2>
-              <p className="lr-modal-sub">Architecting your personalized environment and verifying professional credentials.</p>
-
-
-              {/* Step cards */}
-              <div className="lr-modal-steps">
-                {VSTEPS.map((vs, i) => {
-                  const st = stepStates[i];
-                  return (
-                    <div
-                      key={vs.label}
-                      className={`lr-modal-step lr-modal-step--${st}`}
-                      style={{ animationDelay: `${i * 0.08}s` }}
-                    >
-                      <div className="lr-modal-step-icon">
-                        {st === 'verified'
-                          ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                          : vs.icon}
-                      </div>
-                      <span className="lr-modal-step-label">{vs.label}</span>
-                      <span className="lr-modal-step-status">
-                        {st === 'queue' && 'Queue'}
-                        {st === 'processing' && 'Processing...'}
-                        {st === 'verified' && 'Verified'}
-                        {st === 'error' && 'Failed'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Error message */}
-              {submitState === 'error' && (
-                <p className="lr-modal-error">{submitError}</p>
-              )}
-
-              {/* Success action */}
-              {submitState === 'success' && (
-                <button
-                  className="lr-modal-done"
-                  onClick={() => {
-                    setShowModal(false);
-                    setActivePage('learnerlogin');
-                  }}
-                >
-                  Enter Console Learning →
-                </button>
-              )}
-
-              {/* Error retry */}
-              {submitState === 'error' && (
-                <button
-                  className="lr-modal-retry"
-                  onClick={() => {
-                    setShowModal(false);
-                    setSubmitState('idle');
-                    setSubmitError('');
-                  }}
-                >
-                  ← Go back and try again
-                </button>
-              )}
-
-              {/* Footer status bar */}
-              <div className="lr-modal-statusbar">
-                <span>PRECISION PROTOCOL V4.2.0</span>
-                <span className="lr-modal-statusbar-dot" />
-                <span>ENCRYPTED SESSION</span>
-                <span>SYSTEM LOAD: OPTIMAL</span>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      <main className="lr-review-main">
-        <div className="lr-review-layout">
-
-          {/* ── Left Panel ── */}
-          <div className="lr-review-left">
-            <div className="lr-review-left-text">
-              <h2 className="lr-review-left-title">Verify Your Blueprint</h2>
-              <p className="lr-review-left-sub">
-                Confirm your technical profile and learning path before we initialize your workspace in the precision atelier.
-              </p>
-            </div>
-            <div className="lr-review-left-img">
-              <img
-                src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&q=80"
-                alt="Blueprint workspace"
-              />
-            </div>
-          </div>
-
-          {/* ── Right Panel ── */}
-          <div className="lr-review-right">
-
-            {/* Identity Module */}
-            <div className="lr-review-module">
-              <div className="lr-review-module-header">
-                <div className="lr-review-module-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+              <button
+                className="lr-path-cta"
+                style={path.disabled
+                  ? (path.resumable ? { background: path.accentLight, color: path.accent, border: `1.5px solid ${path.accent}` } : {})
+                  : { background: path.accent, color: '#fff' }}
+                disabled={path.disabled}
+              >
+                {path.cta}
+                {!path.disabled && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                   </svg>
-                </div>
-                <h3 className="lr-review-module-title">Identity Module</h3>
-              </div>
+                )}
+              </button>
 
-              <div className="lr-review-data-card">
-                <div className="lr-review-row-2">
-                  <div className="lr-review-field">
-                    <span className="lr-review-field-label">First name</span>
-                    <span className="lr-review-field-value">{form.firstName || '—'}</span>
-                  </div>
-                  <div className="lr-review-field">
-                    <span className="lr-review-field-label">Last name</span>
-                    <span className="lr-review-field-value">{form.lastName || '—'}</span>
-                  </div>
-                </div>
-                <div className="lr-review-divider" />
-                <div className="lr-review-field">
-                  <span className="lr-review-field-label">Email address</span>
-                  <span className="lr-review-field-value">{form.email || '—'}</span>
-                </div>
-                <div className="lr-review-divider" />
-                <div className="lr-review-field">
-                  <span className="lr-review-field-label">Academic qualification</span>
-                  <span className="lr-review-field-value">{qualLabel}</span>
-                </div>
-              </div>
+              {path.disabled && !path.resumable && <div className="lr-path-lock">🔒 Complete step {path.id - 1} first</div>}
+              {path.resumable && <div className="lr-path-lock" style={{ color: path.accent }}>⚠️ Draft saved — sign in to continue</div>}
             </div>
+          ))}
+        </div>
 
-            {/* Aspiration Module */}
-            <div className="lr-review-module">
-              <div className="lr-review-module-header">
-                <div className="lr-review-module-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
-                  </svg>
-                </div>
-                <h3 className="lr-review-module-title">Aspiration Module</h3>
-              </div>
-
-              <div className="lr-review-data-card lr-review-data-card--split">
-                <div className="lr-review-split-left">
-                  <span className="lr-review-field-label">Primary goal</span>
-                  <div className="lr-review-goal-row">
-                    <span className="lr-review-goal-icon">{goalObj?.icon}</span>
-                    <span className="lr-review-goal-name">{goalObj?.title || '—'}</span>
-                  </div>
-                </div>
-                <div className="lr-review-split-divider" />
-                <div className="lr-review-split-right">
-                  <span className="lr-review-field-label">Focus areas</span>
-                  <div className="lr-review-area-pills">
-                    {selectedAreas.length > 0
-                      ? selectedAreas.map((a) => <span key={a} className="lr-review-area-pill">{a}</span>)
-                      : <span className="lr-review-field-value">None selected</span>
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Finalize */}
-            <button className="lr-review-finalize" onClick={handleFinalize}>
-              Finalize Account
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
-
-            <button className="lr-review-goback" onClick={() => setScene('trajectory')}>
-              Go Back
-            </button>
-          </div>
+        <div className="lr-path-steps-indicator">
+          {PATHS.map((p) => <div key={p.id} className={`lr-dot ${p.id === 1 ? 'lr-dot--active' : ''}`} />)}
         </div>
       </main>
     </div>
   );
+}
+
+/* ══════════════════════════════
+   SCENE B: Profile form (+ flip wrapper)
+══════════════════════════════ */
+if (scene === 'form' || scene === 'flipping') {
+  return (
+    <div className="lr-page">
+      <Stepper activeStep={1} />
+
+      <main className={`lr-main ${scene === 'form' ? 'lr-main--animated' : ''}`}>
+        <div className={`lr-flip-wrapper ${scene === 'flipping' ? 'lr-flip-wrapper--flipping' : ''}`}>
+          <div className="lr-card">
+            <h2 className="lr-title">Begin Your Journey</h2>
+            <p className="lr-subtitle">
+              Create your professional profile to unlock personalized learning pathways tailored to your career aspirations.
+            </p>
+
+            <form className="lr-form" onSubmit={handleFormSubmit}>
+              <div className="lr-row">
+                <div className="lr-field">
+                  <label htmlFor="lr-fname">FIRST NAME</label>
+                  <input
+                    id="lr-fname" name="firstName" type="text" placeholder="e.g., Alexander"
+                    value={form.firstName} onChange={handle}
+                    className={errors.firstName ? 'lr-input-error' : ''}
+                  />
+                  {errors.firstName && <span className="lr-field-error">{errors.firstName}</span>}
+                </div>
+                <div className="lr-field">
+                  <label htmlFor="lr-lname">LAST NAME</label>
+                  <input
+                    id="lr-lname" name="lastName" type="text" placeholder="e.g., Hamilton"
+                    value={form.lastName} onChange={handle}
+                    className={errors.lastName ? 'lr-input-error' : ''}
+                  />
+                  {errors.lastName && <span className="lr-field-error">{errors.lastName}</span>}
+                </div>
+              </div>
+
+              <div className="lr-field lr-field--full">
+                <label htmlFor="lr-email">EMAIL ADDRESS</label>
+                <input
+                  id="lr-email" name="email" type="email" placeholder="alexander@console.io"
+                  value={form.email} onChange={handle}
+                  className={errors.email ? 'lr-input-error' : ''}
+                />
+                {errors.email && <span className="lr-field-error">{errors.email}</span>}
+              </div>
+
+              <div className="lr-row">
+                <div className="lr-field">
+                  <label htmlFor="lr-pw">PASSWORD</label>
+                  <input
+                    id="lr-pw" name="password" type="password" placeholder="••••••••"
+                    value={form.password} onChange={handle}
+                    className={errors.password ? 'lr-input-error' : ''}
+                  />
+                  {errors.password && <span className="lr-field-error">{errors.password}</span>}
+                </div>
+                <div className="lr-field">
+                  <label htmlFor="lr-cpw">CONFIRM PASSWORD</label>
+                  <input
+                    id="lr-cpw" name="confirmPassword" type="password" placeholder="••••••••"
+                    value={form.confirmPassword} onChange={handle}
+                    className={errors.confirmPassword ? 'lr-input-error' : ''}
+                  />
+                  {errors.confirmPassword && <span className="lr-field-error">{errors.confirmPassword}</span>}
+                </div>
+              </div>
+
+              <div className="lr-field lr-field--full">
+                <label>MAXIMUM EDUCATIONAL QUALIFICATION</label>
+                <div
+                  className={`lr-custom-select ${dropdownOpen ? 'lr-custom-select--open' : ''} ${errors.qualification ? 'lr-custom-select--error' : ''}`}
+                  onClick={() => setDropdownOpen((o) => !o)}
+                  onBlur={() => setTimeout(() => setDropdownOpen(false), 150)}
+                  tabIndex={0}
+                >
+                  <span className={`lr-custom-select__value ${!selectedQual ? 'lr-custom-select__placeholder' : ''}`}>
+                    {selectedQual ? selectedQual.label : 'Select your highest degree'}
+                  </span>
+                  <span className="lr-custom-select__arrow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                  {dropdownOpen && (
+                    <ul className="lr-custom-select__menu" role="listbox">
+                      {QUALIFICATIONS.map((q) => (
+                        <li
+                          key={q.value}
+                          role="option"
+                          aria-selected={form.qualification === q.value}
+                          className={`lr-custom-select__option ${form.qualification === q.value ? 'lr-custom-select__option--active' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setForm((prev) => ({ ...prev, qualification: q.value }));
+                            setErrors((prev) => ({ ...prev, qualification: '' }));
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {q.label}
+                          {form.qualification === q.value && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {errors.qualification && <span className="lr-field-error">{errors.qualification}</span>}
+              </div>
+
+              <label className="lr-checkbox">
+                <input
+                  type="checkbox" name="agreed" checked={form.agreed}
+                  onChange={(e) => { handle(e); setErrors((prev) => ({ ...prev, agreed: '' })); }}
+                />
+                <span className={`lr-checkmark ${errors.agreed ? 'lr-checkmark--error' : ''}`} />
+                <span className="lr-checkbox-text">
+                  I agree to the{' '}
+                  <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>{' '}
+                  and{' '}
+                  <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>{' '}
+                  regarding the collection and use of my professional data.
+                </span>
+              </label>
+              {errors.agreed && <span className="lr-field-error" style={{ marginTop: '-0.75rem', marginBottom: '0.5rem' }}>{errors.agreed}</span>}
+
+              <div className="lr-actions">
+                <p className="lr-signin-prompt">
+                  Already have an account?{' '}
+                  <span className="lr-signin-link" onClick={() => setActivePage('learnerlogin')}>Sign In</span>
+                </p>
+                <button type="submit" className="lr-submit-btn">Save &amp; Continue</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      <footer className="lr-footer">
+        <p>© 2024 CONSOLE ARCHITECTURAL LEARNING SYSTEMS</p>
+      </footer>
+    </div>
+  );
+}
+
+/* ══════════════════════════════
+   SCENE C: Trajectory (+ flip-traj)
+══════════════════════════════ */
+if (scene === 'trajectory' || scene === 'flipping-traj') {
+  return (
+    <div className="lr-page">
+      <Stepper activeStep={2} />
+      <main className={`lr-traj-main ${scene === 'flipping-traj' ? 'lr-traj-main--flipping' : ''}`}>
+        {/* Heading */}
+        <div className="lr-traj-hero">
+          <h1 className="lr-traj-title">Define Your Trajectory</h1>
+          <p className="lr-traj-sub">
+            Map your professional evolution. Our precision-guided curriculum adapts to your specific career milestones.
+          </p>
+        </div>
+
+        <div className="lr-traj-card">
+          {/* PRIMARY GOAL */}
+          <div className="lr-traj-section-label">
+            <div className="lr-traj-section-bar" />
+            <span>SELECT YOUR PRIMARY GOAL</span>
+          </div>
+
+          <div className="lr-goals-grid">
+            {GOALS.map((g) => (
+              <div
+                key={g.id}
+                className={`lr-goal-card ${selectedGoal === g.id ? 'lr-goal-card--active' : ''}`}
+                onClick={() => setSelectedGoal(g.id)}
+              >
+                {selectedGoal === g.id && (
+                  <div className="lr-goal-check">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                )}
+                <div className={`lr-goal-icon ${selectedGoal === g.id ? 'lr-goal-icon--active' : ''}`}>{g.icon}</div>
+                <h4 className="lr-goal-title">{g.title}</h4>
+                <p className="lr-goal-desc">{g.desc}</p>
+              </div>
+            ))}
+          </div>
+          {trajErrors.goal && <span className="lr-field-error" style={{ marginTop: '0.5rem' }}>{trajErrors.goal}</span>}
+
+          {/* FOCUS AREAS */}
+          <div className="lr-traj-section-label" style={{ marginTop: '2rem' }}>
+            <div className="lr-traj-section-bar" />
+            <span>FOCUS AREAS</span>
+          </div>
+
+          <div className={`lr-focus-box ${trajErrors.areas ? 'lr-focus-box--error' : ''}`}>
+            <p className="lr-focus-prompt">Select the technical domains that align with your trajectory objectives:</p>
+            <div className="lr-focus-tags">
+              {FOCUS_AREAS.map((area) => (
+                <button
+                  key={area}
+                  className={`lr-focus-tag ${selectedAreas.includes(area) ? 'lr-focus-tag--active' : ''}`}
+                  onClick={() => toggleArea(area)}
+                  type="button"
+                >
+                  {area}
+                </button>
+              ))}
+            </div>
+          </div>
+          {trajErrors.areas && <span className="lr-field-error" style={{ marginTop: '0.5rem' }}>{trajErrors.areas}</span>}
+        </div>
+
+        {/* Navigation */}
+        <div className="lr-traj-nav">
+          <button className="lr-traj-back" onClick={() => setScene('form')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+            </svg>
+            Go Back
+          </button>
+          <button className="lr-traj-continue" onClick={handleTrajContinue}>
+            Continue to Review
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+        </div>
+      </main>
+
+      <footer className="lr-footer lr-footer--light">
+        <div className="lr-footer-brand">
+          <span className="lr-footer-brand-name">Console Core</span>
+          <p className="lr-footer-copy-small">&copy; 2024 PRECISION IN INFRASTRUCTURE.</p>
+        </div>
+        <div className="lr-footer-links-row">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Security</a>
+          <a href="#">Status</a>
+          <a href="#">Contact</a>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/* ══════════════════════════════
+   SCENE D: Review
+══════════════════════════════ */
+const goalObj = GOALS.find((g) => g.id === selectedGoal);
+const qualObj = QUALIFICATIONS.find((q) => q.value === form.qualification);
+const qualLabel = qualObj ? qualObj.label.replace(/^.{2,4}\s+/, '') : '—';
+
+return (
+  <div className="lr-page">
+    <Stepper activeStep={3} />
+
+    {/* ══ Validation Modal Overlay ══ */}
+    {showModal && (() => {
+      const VSTEPS = [
+        {
+          label: 'Authenticating Identity',
+          icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>),
+        },
+        {
+          label: 'Technical Proficiency',
+          icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34" /><path d="M4 6h.01" /><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35" /></svg>),
+        },
+        {
+          label: 'Custom Workspace',
+          icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>),
+        },
+        {
+          label: 'Finalizing Learner',
+          icon: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>),
+        },
+      ];
+
+      const doneCount = stepStates.filter(s => s === 'verified').length;
+      const progressPct = (doneCount / STEP_COUNT) * 100;
+
+      return (
+        <div className="lr-modal-overlay">
+          <div className="lr-modal-panel">
+            {/* Grid dot background */}
+            <div className="lr-modal-dots" />
+
+            {/* Central icon with circular progress ring */}
+            {(() => {
+              const R = 54;          // ring radius
+              const C = 2 * Math.PI * R;  // circumference ≈ 339.3
+              const offset = C - (progressPct / 100) * C;
+              const isProcessing = stepStates.some(s => s === 'processing');
+              const isDone = submitState === 'success';
+              return (
+                <div className="lr-modal-icon-wrap">
+                  {/* SVG ring: track + progress arc + spin arc */}
+                  <svg
+                    className="lr-modal-ring-svg"
+                    width="120" height="120"
+                    viewBox="0 0 120 120"
+                    style={{ position: 'absolute', top: 0, left: 0 }}
+                  >
+                    {/* Track */}
+                    <circle cx="60" cy="60" r={R} fill="none" stroke="#e2e5f0" strokeWidth="4" />
+                    {/* Progress fill */}
+                    <circle
+                      cx="60" cy="60" r={R}
+                      fill="none"
+                      stroke="#3b5fe2"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray={C}
+                      strokeDashoffset={offset}
+                      transform="rotate(-90 60 60)"
+                      style={{ transition: 'stroke-dashoffset 0.7s cubic-bezier(0.4,0,0.2,1)' }}
+                    />
+                    {/* Spinning arc shown while any step is processing */}
+                    {isProcessing && !isDone && (
+                      <circle
+                        cx="60" cy="60" r={R}
+                        fill="none"
+                        stroke="#6979f8"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeDasharray={`${C * 0.18} ${C * 0.82}`}
+                        transform="rotate(-90 60 60)"
+                        className="lr-modal-spin-arc"
+                      />
+                    )}
+                  </svg>
+                  {/* Icon core */}
+                  <div className="lr-modal-icon-core">
+                    {isDone ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b5fe2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b5fe2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            <h2 className="lr-modal-title">Validating Your Blueprint</h2>
+            <p className="lr-modal-sub">Architecting your personalized environment and verifying professional credentials.</p>
+
+
+            {/* Step cards */}
+            <div className="lr-modal-steps">
+              {VSTEPS.map((vs, i) => {
+                const st = stepStates[i];
+                return (
+                  <div
+                    key={vs.label}
+                    className={`lr-modal-step lr-modal-step--${st}`}
+                    style={{ animationDelay: `${i * 0.08}s` }}
+                  >
+                    <div className="lr-modal-step-icon">
+                      {st === 'verified'
+                        ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                        : vs.icon}
+                    </div>
+                    <span className="lr-modal-step-label">{vs.label}</span>
+                    <span className="lr-modal-step-status">
+                      {st === 'queue' && 'Queue'}
+                      {st === 'processing' && 'Processing...'}
+                      {st === 'verified' && 'Verified'}
+                      {st === 'error' && 'Failed'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Error message */}
+            {submitState === 'error' && (
+              <p className="lr-modal-error">{submitError}</p>
+            )}
+
+            {/* Success action */}
+            {submitState === 'success' && (
+              <button
+                className="lr-modal-done"
+                onClick={() => {
+                  setShowModal(false);
+                  setActivePage('learnerdashboard');
+                }}
+              >
+                Enter Console Learning →
+              </button>
+            )}
+
+            {/* Error retry */}
+            {submitState === 'error' && (
+              <button
+                className="lr-modal-retry"
+                onClick={() => {
+                  setShowModal(false);
+                  setSubmitState('idle');
+                  setSubmitError('');
+                }}
+              >
+                ← Go back and try again
+              </button>
+            )}
+
+            {/* Footer status bar */}
+            <div className="lr-modal-statusbar">
+              <span>PRECISION PROTOCOL V4.2.0</span>
+              <span className="lr-modal-statusbar-dot" />
+              <span>ENCRYPTED SESSION</span>
+              <span>SYSTEM LOAD: OPTIMAL</span>
+            </div>
+          </div>
+        </div>
+      );
+    })()}
+
+    <main className="lr-review-main">
+      <div className="lr-review-layout">
+
+        {/* ── Left Panel ── */}
+        <div className="lr-review-left">
+          <div className="lr-review-left-text">
+            <h2 className="lr-review-left-title">Verify Your Blueprint</h2>
+            <p className="lr-review-left-sub">
+              Confirm your technical profile and learning path before we initialize your workspace in the precision atelier.
+            </p>
+          </div>
+          <div className="lr-review-left-img">
+            <img
+              src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500&q=80"
+              alt="Blueprint workspace"
+            />
+          </div>
+        </div>
+
+        {/* ── Right Panel ── */}
+        <div className="lr-review-right">
+
+          {/* Identity Module */}
+          <div className="lr-review-module">
+            <div className="lr-review-module-header">
+              <div className="lr-review-module-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <h3 className="lr-review-module-title">Identity Module</h3>
+            </div>
+
+            <div className="lr-review-data-card">
+              <div className="lr-review-row-2">
+                <div className="lr-review-field">
+                  <span className="lr-review-field-label">First name</span>
+                  <span className="lr-review-field-value">{form.firstName || '—'}</span>
+                </div>
+                <div className="lr-review-field">
+                  <span className="lr-review-field-label">Last name</span>
+                  <span className="lr-review-field-value">{form.lastName || '—'}</span>
+                </div>
+              </div>
+              <div className="lr-review-divider" />
+              <div className="lr-review-field">
+                <span className="lr-review-field-label">Email address</span>
+                <span className="lr-review-field-value">{form.email || '—'}</span>
+              </div>
+              <div className="lr-review-divider" />
+              <div className="lr-review-field">
+                <span className="lr-review-field-label">Academic qualification</span>
+                <span className="lr-review-field-value">{qualLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Aspiration Module */}
+          <div className="lr-review-module">
+            <div className="lr-review-module-header">
+              <div className="lr-review-module-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+                </svg>
+              </div>
+              <h3 className="lr-review-module-title">Aspiration Module</h3>
+            </div>
+
+            <div className="lr-review-data-card lr-review-data-card--split">
+              <div className="lr-review-split-left">
+                <span className="lr-review-field-label">Primary goal</span>
+                <div className="lr-review-goal-row">
+                  <span className="lr-review-goal-icon">{goalObj?.icon}</span>
+                  <span className="lr-review-goal-name">{goalObj?.title || '—'}</span>
+                </div>
+              </div>
+              <div className="lr-review-split-divider" />
+              <div className="lr-review-split-right">
+                <span className="lr-review-field-label">Focus areas</span>
+                <div className="lr-review-area-pills">
+                  {selectedAreas.length > 0
+                    ? selectedAreas.map((a) => <span key={a} className="lr-review-area-pill">{a}</span>)
+                    : <span className="lr-review-field-value">None selected</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Finalize */}
+          <button className="lr-review-finalize" onClick={handleFinalize}>
+            Finalize Account
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+            </svg>
+          </button>
+
+          <button className="lr-review-goback" onClick={() => setScene('trajectory')}>
+            Go Back
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+);
 };
 
 export default LearnerRegistration;

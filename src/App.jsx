@@ -11,6 +11,7 @@ import Jobs from './Jobs';
 import OpenPositions from './OpenPositions';
 import LearnerLogin from './LearnerLogin';
 import LearnerRegistration from './LearnerRegistration';
+import LearnerDashboard from './LearnerDashboard';
 import './App.css';
 import {
   LayoutDashboard,
@@ -101,8 +102,9 @@ function App() {
     }
     // 2. Map URL pathname → page key (so /learner-login reloads correctly)
     const pathMap = {
-      '/learner-login':       'learnerlogin',
-      '/learner-registration':'learnerregistration',
+      '/learner-login':         'learnerlogin',
+      '/learner-registration':  'learnerregistration',
+      '/learner-dashboard':     'learnerdashboard',
       '/signin':              'signin',
       '/sign-in':             'signin',
       '/get-started':         'getstarted',
@@ -254,7 +256,7 @@ function App() {
       <main className="main-content">
 
         {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard, OpenPositions, LearnerLogin, and LearnerRegistration pages */}
-        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && (
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && activePage !== 'learnerdashboard' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
@@ -592,6 +594,8 @@ function App() {
           <LearnerLogin setActivePage={setActivePage} />
         ) : activePage === 'learnerregistration' ? (
           <LearnerRegistration setActivePage={setActivePage} />
+        ) : activePage === 'learnerdashboard' ? (
+          <LearnerDashboard setActivePage={setActivePage} />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}
