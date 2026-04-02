@@ -9,6 +9,8 @@ import GetStarted from './GetStarted';
 import UserDashboard from './UserDashboard';
 import Jobs from './Jobs';
 import OpenPositions from './OpenPositions';
+import LearnerLogin from './LearnerLogin';
+import LearnerRegistration from './LearnerRegistration';
 import './App.css';
 import {
   LayoutDashboard,
@@ -85,10 +87,51 @@ const faqs = [
 ];
 
 function App() {
-  const [activePage, _setActivePage] = useState(() => sessionStorage.getItem('console_activePage') || 'home');
+  const [activePage, _setActivePage] = useState(() => {
+    // 1. Check ?page= query param first (used by modal "Proceed" links)
+    const params = new URLSearchParams(window.location.search);
+    const queryPage = params.get('page');
+    if (queryPage) {
+      if (window.history && window.history.replaceState) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('page');
+        window.history.replaceState({}, '', newUrl.toString());
+      }
+      return queryPage;
+    }
+    // 2. Map URL pathname → page key (so /learner-login reloads correctly)
+    const pathMap = {
+      '/learner-login':       'learnerlogin',
+      '/learner-registration':'learnerregistration',
+      '/signin':              'signin',
+      '/sign-in':             'signin',
+      '/get-started':         'getstarted',
+      '/dashboard':           'userdashboard',
+      '/documentation':       'documentation',
+      '/solutions':           'solutions',
+      '/resources':           'resources',
+      '/jobs':                'jobs',
+      '/open-positions':      'openpositions',
+    };
+    const fromPath = pathMap[window.location.pathname];
+    if (fromPath) return fromPath;
+    // 3. Fall back to sessionStorage (preserves SPA navigation across normal reloads)
+    return sessionStorage.getItem('console_activePage') || 'home';
+  });
   const [previousPage, setPreviousPage] = useState(() => sessionStorage.getItem('console_previousPage') || 'home');
+  const [authBanner, setAuthBanner] = useState(null);
+
+  const PROTECTED_PAGES = ['jobs', 'resources', 'openpositions'];
 
   const setActivePage = (pageStr) => {
+    // Auth guard — redirect unauthenticated users away from protected pages
+    if (PROTECTED_PAGES.includes(pageStr) && !sessionRef.current) {
+      setAuthBanner('Please sign in to access this section.');
+      setTimeout(() => setAuthBanner(null), 4000);
+      _setActivePage('signin');
+      sessionStorage.setItem('console_activePage', 'signin');
+      return;
+    }
     if (activePage !== 'notfound' && pageStr === 'notfound') {
       setPreviousPage(activePage);
       sessionStorage.setItem('console_previousPage', activePage);
@@ -106,6 +149,7 @@ function App() {
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
   const [session, setSession] = useState(null);
+  const sessionRef = useRef(null);
   const reviewCarouselRef = useRef(null);
 
   const scrollReviews = (direction) => {
@@ -115,24 +159,25 @@ function App() {
   };
 
   useEffect(() => {
+    // Commenting out getTodos() since the 'todos' table doesn't exist yet, which throws a 404
+    /*
     async function getTodos() {
       const { data: todosData } = await supabase.from('todos').select();
-
-      if (todosData) {
-        setTodos(todosData);
-      }
+      if (todosData) setTodos(todosData);
     }
-
     getTodos();
+    */
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      sessionRef.current = session;
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      sessionRef.current = session;
     });
 
     return () => subscription.unsubscribe();
@@ -208,8 +253,8 @@ function App() {
       {/* Main Content */}
       <main className="main-content">
 
-        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard and OpenPositions pages */}
-        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && (
+        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard, OpenPositions, LearnerLogin, and LearnerRegistration pages */}
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
@@ -258,277 +303,277 @@ function App() {
           <>
             {/* Hero Section */}
             <section className="hero-section">
-          {/* Flex container to place hero text to the left and search bar to the right */}
-          <div className="hero-container">
-            {/* Hero text content — z-index above all wave layers */}
-            <div className="hero-content">
-              <h1 className="hero-title">
-                <span style={{ color: '#2f6be8' }}>Console</span>: Elevating Technology from <span className="highlight">Learners to Entrepreneurs.</span>
-              </h1>
-              <p className="hero-description">
-                The architect's choice for digital production. From fundamental curriculum to enterprise-grade infrastructure, we provide the tools to build the future.
-              </p>
-              <div className="hero-actions">
-                <button className="btn-primary" onClick={() => setActivePage(session ? 'userprojects' : 'getstarted')}>Start Building</button>
-                <button className="btn-secondary" onClick={() => setActivePage('notfound')}>View Platform Docs</button>
-              </div>
-            </div>
-
-            {/* Floating Search Bar — now positioned on the right */}
-            <div className="floating-search">
-              <div className="search-input-group">
-                <Search size={18} color="#9ca3af" />
-                <input type="text" placeholder="Search you Dreams .........................!" />
-              </div>
-              <div className="floating-actions">
-                <button onClick={() => setActivePage('notfound')}><Plus size={20} color="#2f6be8" /></button>
-                <button onClick={() => setActivePage('notfound')}><Bell size={20} color="#6b7280" /></button>
-                <div className="avatar-small">AM</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Third wave layer — lightest foreground wave */}
-          <div className="hero-wave-top">
-            <svg viewBox="0 0 1440 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-              <path
-                fill="#f5f6f8"
-                fillOpacity="0.9"
-                d="M0,128L60,117.3C120,107,240,85,360,90.7C480,96,600,128,720,133.3C840,139,960,117,1080,106.7C1200,96,1320,96,1380,96L1440,96L1440,180L1380,180C1320,180,1200,180,1080,180C960,180,840,180,720,180C600,180,480,180,360,180C240,180,120,180,60,180L0,180Z"
-              />
-            </svg>
-          </div>
-        </section>
-
-        {/* Category Carousel Section */}
-        <section className="carousel-section">
-          <div className="carousel-header">
-            <div>
-              <div className="section-label">What We Offer</div>
-              <h2 className="section-title" style={{ marginBottom: 0 }}>Explore by Category</h2>
-            </div>
-          </div>
-
-          <div className="carousel-track" ref={carouselRef}>
-            {categories.map((cat) => (
-              <div key={cat.name} className="carousel-card">
-                <div className="icon-box">{cat.icon}</div>
-                <h3>{cat.name}</h3>
-                <p>{cat.desc}</p>
-                <a href="#" className="card-link" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>
-                  Explore <ArrowRight size={14} />
-                </a>
-              </div>
-            ))}
-          </div>
-
-          <div className="carousel-controls">
-            <button className="carousel-btn" onClick={() => scrollCarousel(-1)}>
-              <ChevronLeft size={20} />
-            </button>
-            <button className="carousel-btn" onClick={() => scrollCarousel(1)}>
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </section>
-
-        {/* Testimonials / Partners Section */}
-        <section className="carousel-section" style={{ backgroundColor: '#f9fafb', borderTop: '1px solid #ebebed', borderBottom: '1px solid #ebebed' }}>
-          <div className="carousel-header">
-            <div>
-              <div className="section-label" style={{ color: '#2f6be8' }}>What Our Partners Say</div>
-              <h2 className="section-title" style={{ marginBottom: 0 }}>Trusted by Visionaries</h2>
-            </div>
-          </div>
-
-          <div className="carousel-track" ref={reviewCarouselRef}>
-            {reviews.map((rev, i) => (
-              <div key={i} className="review-card">
-                <div className="review-header">
-                  <img src={rev.avatar} alt={rev.name} className="review-avatar" />
-                  <div className="review-meta">
-                    <h4>{rev.name}</h4>
-                    <span>{rev.role}</span>
+              {/* Flex container to place hero text to the left and search bar to the right */}
+              <div className="hero-container">
+                {/* Hero text content — z-index above all wave layers */}
+                <div className="hero-content">
+                  <h1 className="hero-title">
+                    <span style={{ color: '#2f6be8' }}>Console</span>: Elevating Technology from <span className="highlight">Learners to Entrepreneurs.</span>
+                  </h1>
+                  <p className="hero-description">
+                    The architect's choice for digital production. From fundamental curriculum to enterprise-grade infrastructure, we provide the tools to build the future.
+                  </p>
+                  <div className="hero-actions">
+                    <button className="btn-primary" onClick={() => setActivePage(session ? 'userprojects' : 'getstarted')}>Start Building</button>
+                    <button className="btn-secondary" onClick={() => setActivePage('notfound')}>View Platform Docs</button>
                   </div>
                 </div>
-                <div className="review-rating">
-                  {[...Array(5)].map((_, idx) => (
-                    <Star key={idx} size={16} fill={idx < rev.rating ? "#f59e0b" : "transparent"} color={idx < rev.rating ? "#f59e0b" : "#d1d5db"} />
+
+                {/* Floating Search Bar — now positioned on the right */}
+                <div className="floating-search">
+                  <div className="search-input-group">
+                    <Search size={18} color="#9ca3af" />
+                    <input type="text" placeholder="Search you Dreams .........................!" />
+                  </div>
+                  <div className="floating-actions">
+                    <button onClick={() => setActivePage('notfound')}><Plus size={20} color="#2f6be8" /></button>
+                    <button onClick={() => setActivePage('notfound')}><Bell size={20} color="#6b7280" /></button>
+                    <div className="avatar-small">AM</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Third wave layer — lightest foreground wave */}
+              <div className="hero-wave-top">
+                <svg viewBox="0 0 1440 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                  <path
+                    fill="#f5f6f8"
+                    fillOpacity="0.9"
+                    d="M0,128L60,117.3C120,107,240,85,360,90.7C480,96,600,128,720,133.3C840,139,960,117,1080,106.7C1200,96,1320,96,1380,96L1440,96L1440,180L1380,180C1320,180,1200,180,1080,180C960,180,840,180,720,180C600,180,480,180,360,180C240,180,120,180,60,180L0,180Z"
+                  />
+                </svg>
+              </div>
+            </section>
+
+            {/* Category Carousel Section */}
+            <section className="carousel-section">
+              <div className="carousel-header">
+                <div>
+                  <div className="section-label">What We Offer</div>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Explore by Category</h2>
+                </div>
+              </div>
+
+              <div className="carousel-track" ref={carouselRef}>
+                {categories.map((cat) => (
+                  <div key={cat.name} className="carousel-card">
+                    <div className="icon-box">{cat.icon}</div>
+                    <h3>{cat.name}</h3>
+                    <p>{cat.desc}</p>
+                    <a href="#" className="card-link" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>
+                      Explore <ArrowRight size={14} />
+                    </a>
+                  </div>
+                ))}
+              </div>
+
+              <div className="carousel-controls">
+                <button className="carousel-btn" onClick={() => scrollCarousel(-1)}>
+                  <ChevronLeft size={20} />
+                </button>
+                <button className="carousel-btn" onClick={() => scrollCarousel(1)}>
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </section>
+
+            {/* Testimonials / Partners Section */}
+            <section className="carousel-section" style={{ backgroundColor: '#f9fafb', borderTop: '1px solid #ebebed', borderBottom: '1px solid #ebebed' }}>
+              <div className="carousel-header">
+                <div>
+                  <div className="section-label" style={{ color: '#2f6be8' }}>What Our Partners Say</div>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Trusted by Visionaries</h2>
+                </div>
+              </div>
+
+              <div className="carousel-track" ref={reviewCarouselRef}>
+                {reviews.map((rev, i) => (
+                  <div key={i} className="review-card">
+                    <div className="review-header">
+                      <img src={rev.avatar} alt={rev.name} className="review-avatar" />
+                      <div className="review-meta">
+                        <h4>{rev.name}</h4>
+                        <span>{rev.role}</span>
+                      </div>
+                    </div>
+                    <div className="review-rating">
+                      {[...Array(5)].map((_, idx) => (
+                        <Star key={idx} size={16} fill={idx < rev.rating ? "#f59e0b" : "transparent"} color={idx < rev.rating ? "#f59e0b" : "#d1d5db"} />
+                      ))}
+                    </div>
+                    <p className="review-text">"{rev.text}"</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="carousel-controls">
+                <button className="carousel-btn" onClick={() => scrollReviews(-1)}>
+                  <ChevronLeft size={20} />
+                </button>
+                <button className="carousel-btn" onClick={() => scrollReviews(1)}>
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </section>
+
+            {/* Learning Platform Section */}
+            <section className="section-wrapper">
+              <div className="section-label red">Learning Platform</div>
+              <h2 className="section-title">Active Curriculum</h2>
+
+              <div className="learning-layout">
+                <div className="learning-content">
+                  <p>Bridge the gap between theory and industry. Our proprietary curriculum tracks your growth in real-time as you master the <span style={{ color: '#2f6be8', fontWeight: 600 }}>Console</span> ecosystem.</p>
+
+                  <div className="progress-card">
+                    <div className="progress-header">
+                      <span>Cloud Architecture 101</span>
+                      <span className="progress-percent">75%</span>
+                    </div>
+                    <div className="progress-bar-bg">
+                      <div className="progress-bar-fill" style={{ width: '75%' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="progress-card">
+                    <div className="progress-header">
+                      <span>Data Hub Management</span>
+                      <span className="progress-label">Next: Chapter 4</span>
+                    </div>
+                    <div className="progress-bar-bg">
+                      <div className="progress-bar-fill" style={{ width: '40%' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="video-placeholder">
+                  <div className="play-button"></div>
+                </div>
+              </div>
+            </section>
+
+            {/* Productivity Tools Section */}
+            <section className="tools-section">
+              <h2 className="section-title">Productivity & IT Tools</h2>
+              <p>Seamless integration of enterprise-grade utilities for the modern digital workspace.</p>
+
+              <div className="tools-grid">
+
+                <div className="tool-card">
+                  <div className="tool-icon">
+                    <Terminal size={20} />
+                  </div>
+                  <h4><span style={{ color: '#2f6be8' }}>Console</span> CLI</h4>
+                  <p>Unified command line interface for global deployments and resource management.</p>
+                  <div className="tool-footer">
+                    <div className="code-snippet">$ <span style={{ color: '#2f6be8' }}>console</span> deploy --prod</div>
+                  </div>
+                </div>
+
+                <div className="tool-card">
+                  <div className="tool-icon" style={{ backgroundColor: '#e0e7ff', color: '#4f46e5' }}>
+                    <Database size={20} />
+                  </div>
+                  <h4>Data Hub</h4>
+                  <p>High-concurrency data storage with automated sharding and real-time syncing.</p>
+                  <div className="tool-footer">
+                    <div className="abstract-shapes">
+                      <div className="shape-circle" style={{ backgroundColor: '#c7d2fe' }}></div>
+                      <div className="shape-circle" style={{ backgroundColor: '#a5b4fc', marginLeft: '-10px' }}></div>
+                      <div className="shape-circle" style={{ backgroundColor: '#6366f1', marginLeft: '-10px' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="tool-card">
+                  <div className="tool-icon" style={{ backgroundColor: '#fae8ff', color: '#c026d3' }}>
+                    <LineChart size={20} />
+                  </div>
+                  <h4>Analytic</h4>
+                  <p>Deeper insights into your traffic patterns and system health metrics.</p>
+                  <div className="tool-footer">
+                    <div className="abstract-shapes">
+                      <div className="shape-bar" style={{ height: '8px' }}></div>
+                      <div className="shape-bar" style={{ height: '14px', backgroundColor: '#a5b4fc' }}></div>
+                      <div className="shape-bar" style={{ height: '22px', backgroundColor: '#818cf8' }}></div>
+                      <div className="shape-bar" style={{ height: '16px', backgroundColor: '#6366f1' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="tool-card">
+                  <div className="tool-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+                    <ShieldCheck size={20} />
+                  </div>
+                  <h4>Guard</h4>
+                  <p>End-to-end encryption and automated threat detection for all projects.</p>
+                  <div className="tool-footer">
+                    <div className="status-badge">
+                      <span className="status-dot"></span> System Secured
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section className="section-wrapper" style={{ backgroundColor: '#ffffff' }}>
+              <div className="section-label">Support & Resources</div>
+              <h2 className="section-title">Frequently Asked Questions</h2>
+              <div className="faq-container">
+                {faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    className={`faq-item ${openFaq === index ? 'active' : ''}`}
+                  >
+                    <div
+                      className="faq-question"
+                      onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    >
+                      {faq.question}
+                      <ChevronDown className={`faq-icon ${openFaq === index ? 'rotate' : ''}`} size={20} />
+                    </div>
+                    {openFaq === index && (
+                      <div className="faq-answer">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center' }}>
+                <button
+                  className="btn-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 2rem', fontSize: '1rem', borderRadius: '2rem', boxShadow: '0 4px 14px rgba(47, 107, 232, 0.25)' }}
+                  onClick={() => setIsQueryModalOpen(true)}
+                >
+                  <MessageSquare size={18} /> Ask a Question
+                </button>
+              </div>
+            </section>
+
+            {/* Live Supabase Data Section */}
+            {todos.length > 0 && (
+              <section className="section-wrapper" style={{ paddingBottom: '2rem' }}>
+                <div className="section-label" style={{ color: '#10b981' }}>Live Database Connect</div>
+                <h2 className="section-title" style={{ marginBottom: '1.5rem' }}>Active Tasks</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '800px' }}>
+                  {todos.map((todo) => (
+                    <div key={todo.id} style={{ padding: '1.25rem', backgroundColor: '#ffffff', borderRadius: '0.75rem', border: '1px solid #ebebed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
+                      <span style={{ fontSize: '1rem', fontWeight: 600, color: '#0d0f12' }}>{todo.name}</span>
+                    </div>
                   ))}
                 </div>
-                <p className="review-text">"{rev.text}"</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="carousel-controls">
-            <button className="carousel-btn" onClick={() => scrollReviews(-1)}>
-              <ChevronLeft size={20} />
-            </button>
-            <button className="carousel-btn" onClick={() => scrollReviews(1)}>
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        </section>
-
-        {/* Learning Platform Section */}
-        <section className="section-wrapper">
-          <div className="section-label red">Learning Platform</div>
-          <h2 className="section-title">Active Curriculum</h2>
-
-          <div className="learning-layout">
-            <div className="learning-content">
-              <p>Bridge the gap between theory and industry. Our proprietary curriculum tracks your growth in real-time as you master the <span style={{ color: '#2f6be8', fontWeight: 600 }}>Console</span> ecosystem.</p>
-
-              <div className="progress-card">
-                <div className="progress-header">
-                  <span>Cloud Architecture 101</span>
-                  <span className="progress-percent">75%</span>
-                </div>
-                <div className="progress-bar-bg">
-                  <div className="progress-bar-fill" style={{ width: '75%' }}></div>
-                </div>
-              </div>
-
-              <div className="progress-card">
-                <div className="progress-header">
-                  <span>Data Hub Management</span>
-                  <span className="progress-label">Next: Chapter 4</span>
-                </div>
-                <div className="progress-bar-bg">
-                  <div className="progress-bar-fill" style={{ width: '40%' }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="video-placeholder">
-              <div className="play-button"></div>
-            </div>
-          </div>
-        </section>
-
-        {/* Productivity Tools Section */}
-        <section className="tools-section">
-          <h2 className="section-title">Productivity & IT Tools</h2>
-          <p>Seamless integration of enterprise-grade utilities for the modern digital workspace.</p>
-
-          <div className="tools-grid">
-
-            <div className="tool-card">
-              <div className="tool-icon">
-                <Terminal size={20} />
-              </div>
-              <h4><span style={{ color: '#2f6be8' }}>Console</span> CLI</h4>
-              <p>Unified command line interface for global deployments and resource management.</p>
-              <div className="tool-footer">
-                <div className="code-snippet">$ <span style={{ color: '#2f6be8' }}>console</span> deploy --prod</div>
-              </div>
-            </div>
-
-            <div className="tool-card">
-              <div className="tool-icon" style={{ backgroundColor: '#e0e7ff', color: '#4f46e5' }}>
-                <Database size={20} />
-              </div>
-              <h4>Data Hub</h4>
-              <p>High-concurrency data storage with automated sharding and real-time syncing.</p>
-              <div className="tool-footer">
-                <div className="abstract-shapes">
-                  <div className="shape-circle" style={{ backgroundColor: '#c7d2fe' }}></div>
-                  <div className="shape-circle" style={{ backgroundColor: '#a5b4fc', marginLeft: '-10px' }}></div>
-                  <div className="shape-circle" style={{ backgroundColor: '#6366f1', marginLeft: '-10px' }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="tool-card">
-              <div className="tool-icon" style={{ backgroundColor: '#fae8ff', color: '#c026d3' }}>
-                <LineChart size={20} />
-              </div>
-              <h4>Analytic</h4>
-              <p>Deeper insights into your traffic patterns and system health metrics.</p>
-              <div className="tool-footer">
-                <div className="abstract-shapes">
-                  <div className="shape-bar" style={{ height: '8px' }}></div>
-                  <div className="shape-bar" style={{ height: '14px', backgroundColor: '#a5b4fc' }}></div>
-                  <div className="shape-bar" style={{ height: '22px', backgroundColor: '#818cf8' }}></div>
-                  <div className="shape-bar" style={{ height: '16px', backgroundColor: '#6366f1' }}></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="tool-card">
-              <div className="tool-icon" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
-                <ShieldCheck size={20} />
-              </div>
-              <h4>Guard</h4>
-              <p>End-to-end encryption and automated threat detection for all projects.</p>
-              <div className="tool-footer">
-                <div className="status-badge">
-                  <span className="status-dot"></span> System Secured
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="section-wrapper" style={{ backgroundColor: '#ffffff' }}>
-          <div className="section-label">Support & Resources</div>
-          <h2 className="section-title">Frequently Asked Questions</h2>
-          <div className="faq-container">
-            {faqs.map((faq, index) => (
-              <div 
-                key={index} 
-                className={`faq-item ${openFaq === index ? 'active' : ''}`}
-              >
-                <div 
-                  className="faq-question"
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                >
-                  {faq.question}
-                  <ChevronDown className={`faq-icon ${openFaq === index ? 'rotate' : ''}`} size={20} />
-                </div>
-                {openFaq === index && (
-                  <div className="faq-answer">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'center' }}>
-            <button 
-              className="btn-primary" 
-              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.8rem 2rem', fontSize: '1rem', borderRadius: '2rem', boxShadow: '0 4px 14px rgba(47, 107, 232, 0.25)' }}
-              onClick={() => setIsQueryModalOpen(true)}
-            >
-              <MessageSquare size={18} /> Ask a Question
-            </button>
-          </div>
-        </section>
-
-        {/* Live Supabase Data Section */}
-        {todos.length > 0 && (
-          <section className="section-wrapper" style={{ paddingBottom: '2rem' }}>
-            <div className="section-label" style={{ color: '#10b981' }}>Live Database Connect</div>
-            <h2 className="section-title" style={{ marginBottom: '1.5rem' }}>Active Tasks</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '800px' }}>
-              {todos.map((todo) => (
-                <div key={todo.id} style={{ padding: '1.25rem', backgroundColor: '#ffffff', borderRadius: '0.75rem', border: '1px solid #ebebed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
-                  <span style={{ fontSize: '1rem', fontWeight: 600, color: '#0d0f12' }}>{todo.name}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-        </>
+              </section>
+            )}
+          </>
         ) : activePage === 'solutions' ? (
           <Solutions setActivePage={setActivePage} />
         ) : activePage === 'resources' ? (
-          <Resources setActivePage={setActivePage} />
+          session ? <Resources setActivePage={setActivePage} /> : <SignIn setActivePage={setActivePage} />
         ) : activePage === 'documentation' ? (
           <Documentation setActivePage={setActivePage} setIsQueryModalOpen={setIsQueryModalOpen} />
         ) : activePage === 'signin' ? (
@@ -536,13 +581,17 @@ function App() {
         ) : activePage === 'getstarted' ? (
           <GetStarted setActivePage={setActivePage} />
         ) : activePage === 'jobs' ? (
-          <Jobs setActivePage={setActivePage} />
+          session ? <Jobs setActivePage={setActivePage} /> : <SignIn setActivePage={setActivePage} />
         ) : activePage === 'openpositions' ? (
-          <OpenPositions setActivePage={setActivePage} />
+          <OpenPositions setActivePage={setActivePage} session={session} />
         ) : activePage === 'userdashboard' ? (
           <UserDashboard session={session} setActivePage={setActivePage} initialTab="overview" />
         ) : activePage === 'userprojects' ? (
           <UserDashboard session={session} setActivePage={setActivePage} initialTab="projects" />
+        ) : activePage === 'learnerlogin' ? (
+          <LearnerLogin setActivePage={setActivePage} />
+        ) : activePage === 'learnerregistration' ? (
+          <LearnerRegistration setActivePage={setActivePage} />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}
@@ -595,6 +644,45 @@ function App() {
           </footer>
         )}
 
+        {/* Auth Banner Toast */}
+        {authBanner && (
+          <div style={{
+            position: 'fixed',
+            top: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 99999,
+            background: '#0f172a',
+            color: '#ffffff',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '2rem',
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            boxShadow: '0 10px 30px rgba(15,23,42,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            animation: 'fadeIn 0.2s ease-out',
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '22px',
+              height: '22px',
+              borderRadius: '50%',
+              background: '#ef4444',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '0.8rem',
+              flexShrink: 0,
+              lineHeight: 1,
+            }}>!</span>
+            {authBanner}
+          </div>
+        )}
+
         {/* Support Query Modal */}
         {isQueryModalOpen && (
           <div className="modal-overlay" onClick={() => setIsQueryModalOpen(false)}>
@@ -643,12 +731,13 @@ function App() {
                 </p>
                 <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                   <button className="btn-secondary" onClick={() => setIsLearningModalOpen(false)} style={{ padding: '0.85rem', flex: 1, borderRadius: '0.5rem' }}>Cancel</button>
-                  <button 
-                    className="btn-primary" 
+                  <button
+                    className="btn-primary"
                     onClick={() => {
                       setIsLearningModalOpen(false);
-                      // Fallback redirect for the Learning dashboard (modify URL as needed)
-                      window.open('http://localhost:5174/', '_blank'); 
+                      const newUrl = new URL(window.location.href);
+                      newUrl.searchParams.set('page', 'learnerlogin');
+                      window.open(newUrl.toString(), '_blank');
                     }}
                     style={{ padding: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flex: 1, borderRadius: '0.5rem' }}
                   >

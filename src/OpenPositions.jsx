@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, MapPin, Clock, Banknote, Rocket, SlidersHorizontal, ArrowDown } from 'lucide-react';
 import './OpenPositions.css';
 
-export default function OpenPositions({ setActivePage }) {
+export default function OpenPositions({ setActivePage, session }) {
   
   const jobs = [
     {
@@ -62,8 +62,21 @@ export default function OpenPositions({ setActivePage }) {
           </nav>
         </div>
         <div className="op-header-right">
-          <button className="op-btn-text" onClick={() => setActivePage('signin')}>Sign in</button>
-          <button className="op-btn-primary" onClick={() => setActivePage('getstarted')}>Join Console</button>
+          {!session ? (
+            <>
+              <button className="op-btn-text" onClick={() => setActivePage('signin')}>Sign in</button>
+              <button className="op-btn-primary" onClick={() => setActivePage('getstarted')}>Join Console</button>
+            </>
+          ) : (
+            <div className="op-user-profile" onClick={() => setActivePage('userdashboard')}>
+              <div className="op-avatar">
+                {session.user?.user_metadata?.first_name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <span className="op-username">
+                {session.user?.user_metadata?.first_name || session.user?.email?.split('@')[0]} {session.user?.user_metadata?.last_name || ''}
+              </span>
+            </div>
+          )}
         </div>
       </header>
 
