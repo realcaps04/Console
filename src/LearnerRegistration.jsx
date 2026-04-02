@@ -257,6 +257,32 @@ const LearnerRegistration = ({ setActivePage }) => {
   /* ── Validation step helpers ── */
   const setStep = (i, s) => setStepStates((prev) => { const next = [...prev]; next[i] = s; return next; });
 
+  /* Translate raw DB/network errors into plain English for learners */
+  const friendlyError = (err) => {
+    const msg = (err?.message || '').toLowerCase();
+    const code = err?.code || '';
+
+    if (code === '23505' || msg.includes('duplicate') || msg.includes('unique'))
+      return 'An account with this email address already exists. Please sign in instead, or use a different email.';
+
+    if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch'))
+      return 'Unable to reach the server. Please check your internet connection and try again.';
+
+    if (code === '42501' || msg.includes('permission') || msg.includes('rls') || msg.includes('policy'))
+      return 'Access was denied by the server. Please refresh the page and try again.';
+
+    if (code?.startsWith('53') || msg.includes('too many') || msg.includes('connection'))
+      return 'Our servers are experiencing high traffic right now. Please wait a moment and try again.';
+
+    if (msg.includes('null value') || msg.includes('not-null'))
+      return 'Some required information is missing. Please go back and fill in all fields.';
+
+    if (msg.includes('invalid input') || msg.includes('invalid value'))
+      return 'One or more of your entries appears to be invalid. Please go back and check your information.';
+
+    return 'Something went wrong while creating your account. Please try again or contact support.';
+  };
+
   /* Finalize Account → show modal, animate steps, then insert */
   const handleFinalize = () => {
     if (submitState === 'success') return;   // already registered
@@ -264,6 +290,55 @@ const LearnerRegistration = ({ setActivePage }) => {
     setSubmitError('');
     setSubmitState('loading');
     setStepStates(Array(STEP_COUNT).fill('queue'));
+
+    // Step 0: Authenticating Identity
+    setTimeout(() => setStep(0, 'processing'), 600);
+    setTimeout(() => setStep(0, 'verified'),   1600);
+
+    // Step 1: Technical Proficiency
+    setTimeout(() => setStep(1, 'processing'), 1900);
+    setTimeout(() => setStep(1, 'verified'),   3000);
+
+    // Step 2: Custom Workspace
+    setTimeout(() => setStep(2, 'processing'), 3300);
+    setTimeout(() => setStep(2, 'verified'),   4400);
+
+    // Step 3: Finalizing Atelier — DB insert fires here
+    setTimeout(() => setStep(3, 'processing'), 4700);
+    setTimeout(async () => {
+      try {
+        const payload = {
+          first_name:    form.firstName.trim(),
+          last_name:     form.lastName.trim(),
+          email:         form.email.trim().toLowerCase(),
+          password_hash: form.password,
+          qualification: form.qualification,
+          primary_goal:  selectedGoal,
+          focus_areas:   selectedAreas,
+          agreed_terms:  form.agreed,
+          // created_at omitted — DB default now() handles it
+        };
+
+        const { error } = await supabase
+          .from('Learners')
+          .insert([payload]);
+
+        if (error) throw error;
+
+        setStep(3, 'verified');
+        setSubmitState('success');
+        // Wipe session so a reload starts fresh
+        ['lr_scene','lr_form','lr_goal','lr_areas','lr_maxStep']
+          .forEach(k => sessionStorage.removeItem(k));
+
+      } catch (err) {
+        console.error('[Learners] Registration error:', err);
+        setStep(3, 'error');
+        setSubmitError(friendlyError(err));
+        setSubmitState('error');
+      }
+    }, 5200);
+  };
 
     // Step 0: Authenticating Identity
     setTimeout(() => setStep(0, 'processing'), 600);
@@ -761,8 +836,28 @@ const LearnerRegistration = ({ setActivePage }) => {
 
               {/* Success action */}
               {submitState === 'success' && (
-                <button className="lr-modal-done" onClick={() => { setShowModal(false); }}>
+                <button
+                  className="lr-modal-done"
+                  onClick={() => {
+                    setShowModal(false);
+                    setActivePage('learnerlogin');
+                  }}
+                >
                   Enter Console Learning →
+                </button>
+              )}
+
+              {/* Error retry */}
+              {submitState === 'error' && (
+                <button
+                  className="lr-modal-retry"
+                  onClick={() => {
+                    setShowModal(false);
+                    setSubmitState('idle');
+                    setSubmitError('');
+                  }}
+                >
+                  ← Go back and try again
                 </button>
               )}
 
