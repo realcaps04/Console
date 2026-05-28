@@ -290,6 +290,7 @@ function App() {
     } catch (e) {
       // silently fail — not critical
     }
+  };
 
   const carouselRef = useRef(null);
 
