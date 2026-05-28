@@ -225,6 +225,8 @@ function App() {
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
   const [session, setSession] = useState(null);
+  const [isLearner, setIsLearner] = useState(false);
+  const [learnerCourses, setLearnerCourses] = useState([]);
   const sessionRef = useRef(null);
   const reviewCarouselRef = useRef(null);
 
@@ -247,6 +249,7 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       sessionRef.current = session;
+      if (session?.user) fetchLearnerStatus(session.user);
     });
 
     const {
@@ -254,10 +257,39 @@ function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       sessionRef.current = session;
+      if (session?.user) fetchLearnerStatus(session.user);
+      else { setIsLearner(false); setLearnerCourses([]); }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch is_learner flag and learner courses from Supabase
+  const fetchLearnerStatus = async (user) => {
+    try {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('is_learner')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.is_learner) {
+        setIsLearner(true);
+        // Fetch learner's enrolled courses from Learners table
+        const { data: learner } = await supabase
+          .from('Learners')
+          .select('focus_areas, primary_goal')
+          .eq('email', user.email)
+          .single();
+        if (learner) {
+          setLearnerCourses(learner.focus_areas || []);
+        }
+      } else {
+        setIsLearner(false);
+      }
+    } catch (e) {
+      // silently fail — not critical
+    }
 
   const carouselRef = useRef(null);
 
@@ -516,25 +548,66 @@ function App() {
                 <div className="learning-content">
                   <p>Bridge the gap between theory and industry. Our proprietary curriculum tracks your growth in real-time as you master the <span style={{ color: '#2f6be8', fontWeight: 600 }}>Console</span> ecosystem.</p>
 
-                  <div className="progress-card">
-                    <div className="progress-header">
-                      <span>Full Stack Development</span>
-                      <span className="progress-percent">75%</span>
+                  {/* Not logged in */}
+                  {!session && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.25rem' }}>
+                        Sign in to access your personalized learning dashboard and track your progress.
+                      </p>
+                      <button className="btn-primary" onClick={() => setActivePage('learnerlogin')}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <GraduationCap size={16} /> Explore Learning Platform
+                      </button>
                     </div>
-                    <div className="progress-bar-bg">
-                      <div className="progress-bar-fill" style={{ width: '75%' }}></div>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="progress-card">
-                    <div className="progress-header">
-                      <span>UI/UX Design</span>
-                      <span className="progress-label">Next: Chapter 4</span>
+                  {/* Logged in but not a learner */}
+                  {session && !isLearner && (
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.25rem' }}>
+                        You are not enrolled in the learning platform yet. Join to access structured courses, assignments and live sessions.
+                      </p>
+                      <button className="btn-primary" onClick={() => setIsLearningModalOpen(true)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <GraduationCap size={16} /> Join Learning Platform
+                      </button>
                     </div>
-                    <div className="progress-bar-bg">
-                      <div className="progress-bar-fill" style={{ width: '40%' }}></div>
+                  )}
+
+                  {/* Logged in and is a learner — show their courses */}
+                  {session && isLearner && (
+                    <div style={{ marginTop: '1rem' }}>
+                      {learnerCourses.length > 0 ? (
+                        <>
+                          {learnerCourses.slice(0, 2).map((course, i) => (
+                            <div key={i} className="progress-card">
+                              <div className="progress-header">
+                                <span>{course}</span>
+                                <span className="progress-label">In Progress</span>
+                              </div>
+                              <div className="progress-bar-bg">
+                                <div className="progress-bar-fill" style={{ width: `${30 + i * 20}%` }}></div>
+                              </div>
+                            </div>
+                          ))}
+                          <button className="btn-primary" onClick={() => setIsLearningModalOpen(true)}
+                            style={{ marginTop: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <GraduationCap size={16} /> Manage Learning Platform
+                          </button>
+                        </>
+                      ) : (
+                        <div>
+                          <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '1.25rem' }}>
+                            You are enrolled but have no active courses yet.
+                          </p>
+                          <button className="btn-primary" onClick={() => setIsLearningModalOpen(true)}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <GraduationCap size={16} /> Go to Learning Platform
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="video-placeholder">
