@@ -1,0 +1,524 @@
+/* ===== CapsMushLogin.css ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap');
+
+/* ---- Reset / Root ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.cmush-root {
+  --cream:       #f5f0e8;
+  --warm-white:  #fdfcf8;
+  --forest:      #2d5016;
+  --forest-md:   #3a6b1a;
+  --forest-light:#4a8022;
+  --sage:        #7a9e5e;
+  --earth:       #8b6914;
+  --mist:        rgba(255,255,255,0.18);
+  --mist-heavy:  rgba(255,255,255,0.28);
+  --glass-border:rgba(255,255,255,0.35);
+  --text-dark:   #1c1a14;
+  --text-mid:    #4a4535;
+  --text-soft:   #8a8070;
+  --text-light:  rgba(255,255,255,0.75);
+  --shadow-soft: 0 8px 32px rgba(45,80,22,0.18);
+  --shadow-glow: 0 0 40px rgba(74,128,34,0.25);
+
+  font-family: 'Inter', sans-serif;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #1a1a0f;
+  overflow: hidden;
+}
+
+/* ---- Phone shell ---- */
+.cmush-phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  border-radius: 48px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 12px #111,
+    0 0 0 14px #2a2a2a,
+    0 40px 80px rgba(0,0,0,0.7),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
+
+  /* Glow ring around phone */
+  filter: drop-shadow(0 0 60px rgba(74,128,34,0.2));
+}
+
+/* ---- Background image ---- */
+.cmush-bg {
+  position: absolute;
+  inset: 0;
+  background: url('./assets/capsmush_bg.png') center/cover no-repeat;
+  transform: scale(1.05);
+  transition: transform 8s ease;
+  z-index: 0;
+}
+.cmush-phone:hover .cmush-bg {
+  transform: scale(1.0);
+}
+
+/* Gradient overlays */
+.cmush-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(245,240,232,0.55) 0%,
+    rgba(200,210,180,0.25) 30%,
+    rgba(20,30,10,0.15) 60%,
+    rgba(10,15,5,0.50) 100%
+  );
+  z-index: 1;
+}
+
+/* Subtle vignette */
+.cmush-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.35) 100%);
+  z-index: 2;
+}
+
+/* ---- Status bar ---- */
+.cmush-status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px 0;
+  z-index: 20;
+}
+
+.cmush-status-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+  letter-spacing: -0.02em;
+}
+
+.cmush-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cmush-status-icons svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--text-dark);
+  opacity: 0.8;
+}
+
+/* ---- Dynamic island ---- */
+.cmush-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 34px;
+  background: #0a0a08;
+  border-radius: 20px;
+  z-index: 25;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+/* ---- Scrollable content ---- */
+.cmush-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  z-index: 10;
+  scrollbar-width: none;
+}
+.cmush-scroll::-webkit-scrollbar { display: none; }
+
+/* ---- Main content wrapper ---- */
+.cmush-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+  padding: 56px 28px 36px;
+}
+
+/* ---- Logo area ---- */
+.cmush-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36px;
+  animation: cmush-fadeDown 0.7s ease both;
+}
+
+.cmush-logo-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow:
+    0 4px 20px rgba(45,80,22,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.cmush-logo-icon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.cmush-brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+  text-shadow: 0 1px 8px rgba(255,255,255,0.6);
+}
+
+.cmush-brand-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-mid);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  text-shadow: 0 1px 4px rgba(255,255,255,0.5);
+}
+
+/* ---- Glass card ---- */
+.cmush-card {
+  width: 100%;
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.40);
+  border-radius: 28px;
+  padding: 28px 24px 24px;
+  box-shadow:
+    0 8px 32px rgba(45,80,22,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 0 rgba(255,255,255,0.15);
+  animation: cmush-fadeUp 0.7s 0.15s ease both;
+}
+
+/* ---- Field group ---- */
+.cmush-field-group {
+  margin-bottom: 16px;
+}
+
+.cmush-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cmush-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.cmush-forgot-link {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.cmush-forgot-link:hover { color: var(--forest-light); }
+
+/* ---- Inputs ---- */
+.cmush-input-wrap {
+  position: relative;
+}
+
+.cmush-input {
+  width: 100%;
+  height: 52px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 14px;
+  padding: 0 18px 0 46px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  outline: none;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+  box-shadow: 0 2px 8px rgba(45,80,22,0.06);
+}
+
+.cmush-input::placeholder {
+  color: var(--text-soft);
+  font-style: italic;
+}
+
+.cmush-input:focus {
+  background: rgba(255,255,255,0.72);
+  border-color: rgba(74,128,34,0.50);
+  box-shadow: 0 0 0 3px rgba(74,128,34,0.12), 0 2px 8px rgba(45,80,22,0.1);
+}
+
+.cmush-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.cmush-input-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  opacity: 0.5;
+  padding: 4px;
+  transition: opacity 0.2s;
+}
+.cmush-input-toggle:hover { opacity: 0.8; }
+
+/* ---- Sign in button ---- */
+.cmush-signin-btn {
+  width: 100%;
+  height: 56px;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-md) 50%, var(--forest-light) 100%);
+  border: none;
+  border-radius: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 6px;
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow:
+    0 4px 20px rgba(45,80,22,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.cmush-signin-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  transition: left 0.5s ease;
+}
+.cmush-signin-btn:hover::before { left: 100%; }
+.cmush-signin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(45,80,22,0.50), var(--shadow-glow), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.cmush-signin-btn:active { transform: translateY(0px); }
+
+/* ---- Divider ---- */
+.cmush-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.cmush-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.40);
+}
+
+.cmush-divider-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+/* ---- Social buttons ---- */
+.cmush-social-row {
+  display: flex;
+  gap: 12px;
+}
+
+.cmush-social-btn {
+  flex: 1;
+  height: 50px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.45);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(45,80,22,0.06);
+}
+
+.cmush-social-btn:hover {
+  background: rgba(255,255,255,0.72);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(45,80,22,0.12);
+}
+
+.cmush-social-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.cmush-social-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-mid);
+}
+
+/* ---- Register prompt ---- */
+.cmush-register-prompt {
+  margin-top: 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text-dark);
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(255,255,255,0.5);
+  animation: cmush-fadeUp 0.7s 0.3s ease both;
+}
+
+.cmush-register-link {
+  font-weight: 600;
+  color: var(--forest-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.cmush-register-link:hover { color: var(--forest-light); text-decoration: underline; }
+
+/* ---- Footer links ---- */
+.cmush-footer {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  animation: cmush-fadeUp 0.7s 0.4s ease both;
+}
+
+.cmush-footer-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.cmush-footer-link:hover { color: var(--text-dark); }
+
+.cmush-footer-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-soft);
+  opacity: 0.6;
+}
+
+/* ---- Bottom gear ---- */
+.cmush-bottom-handle {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: cmush-fadeUp 0.7s 0.45s ease both;
+}
+
+.cmush-handle-line {
+  width: 32px;
+  height: 1px;
+  background: rgba(100,90,70,0.4);
+}
+
+.cmush-handle-gear {
+  font-size: 14px;
+  opacity: 0.45;
+  cursor: pointer;
+  transition: transform 0.4s ease, opacity 0.2s;
+}
+.cmush-handle-gear:hover {
+  transform: rotate(60deg);
+  opacity: 0.7;
+}
+
+/* ---- Animations ---- */
+@keyframes cmush-fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cmush-fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Responsive: render as a page on small screens ---- */
+@media (max-width: 500px) {
+  .cmush-root {
+    align-items: flex-start;
+    background: #0f0f08;
+  }
+
+  .cmush-phone {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+    filter: none;
+  }
+}

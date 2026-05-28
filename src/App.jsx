@@ -12,6 +12,10 @@ import OpenPositions from './OpenPositions';
 import LearnerLogin from './LearnerLogin';
 import LearnerRegistration from './LearnerRegistration';
 import LearnerDashboard from './LearnerDashboard';
+import ProjectDevelopment from './ProjectDevelopment';
+import DataFlowManagement from './DataFlowManagement';
+import LanguageLearning from './LanguageLearning';
+import CapsMushLogin from './CapsMushLogin';
 import './App.css';
 import {
   LayoutDashboard,
@@ -101,6 +105,10 @@ function App() {
       'resources': '/resources',
       'jobs': '/jobs',
       'openpositions': '/open-positions',
+      'projectdevelopment': '/project-development',
+      'dataflowmanagement': '/data-flow-management',
+      'languagelearning': '/language-learning',
+      'capsmushlogin': '/capsmush-login',
     };
 
     const params = new URLSearchParams(window.location.search);
@@ -113,19 +121,23 @@ function App() {
       return queryPage;
     }
     const pathMap = {
-      '/learner-login':         'learnerlogin',
-      '/learner-registration':  'learnerregistration',
-      '/learner-dashboard':     'learnerdashboard',
-      '/signin':              'signin',
-      '/sign-in':             'signin',
-      '/get-started':         'getstarted',
-      '/dashboard':           'userdashboard',
-      '/documentation':       'documentation',
-      '/solutions':           'solutions',
-      '/resources':           'resources',
-      '/jobs':                'jobs',
-      '/open-positions':      'openpositions',
-      '/':                    'home'
+      '/learner-login': 'learnerlogin',
+      '/learner-registration': 'learnerregistration',
+      '/learner-dashboard': 'learnerdashboard',
+      '/signin': 'signin',
+      '/sign-in': 'signin',
+      '/get-started': 'getstarted',
+      '/dashboard': 'userdashboard',
+      '/documentation': 'documentation',
+      '/solutions': 'solutions',
+      '/resources': 'resources',
+      '/jobs': 'jobs',
+      '/open-positions': 'openpositions',
+      '/project-development': 'projectdevelopment',
+      '/data-flow-management': 'dataflowmanagement',
+      '/language-learning': 'languagelearning',
+      '/capsmush-login': 'capsmushlogin',
+      '/': 'home'
     };
     const fromPath = pathMap[window.location.pathname];
     if (fromPath) return fromPath;
@@ -134,7 +146,7 @@ function App() {
   const [previousPage, setPreviousPage] = useState(() => sessionStorage.getItem('console_previousPage') || 'home');
   const [authBanner, setAuthBanner] = useState(null);
 
-  const PROTECTED_PAGES = ['jobs', 'resources', 'openpositions'];
+  const PROTECTED_PAGES = ['jobs', 'resources', 'openpositions', 'projectdevelopment', 'dataflowmanagement', 'languagelearning'];
 
   const pageToPath = {
     'learnerlogin': '/learner-login',
@@ -149,6 +161,10 @@ function App() {
     'resources': '/resources',
     'jobs': '/jobs',
     'openpositions': '/open-positions',
+    'projectdevelopment': '/project-development',
+    'dataflowmanagement': '/data-flow-management',
+    'languagelearning': '/language-learning',
+    'capsmushlogin': '/capsmush-login',
     'home': '/',
   };
 
@@ -182,19 +198,23 @@ function App() {
   useEffect(() => {
     const handlePopState = () => {
       const pathMap = {
-        '/learner-login':         'learnerlogin',
-        '/learner-registration':  'learnerregistration',
-        '/learner-dashboard':     'learnerdashboard',
-        '/signin':              'signin',
-        '/sign-in':             'signin',
-        '/get-started':         'getstarted',
-        '/dashboard':           'userdashboard',
-        '/documentation':       'documentation',
-        '/solutions':           'solutions',
-        '/resources':           'resources',
-        '/jobs':                'jobs',
-        '/open-positions':      'openpositions',
-        '/':                    'home',
+        '/learner-login': 'learnerlogin',
+        '/learner-registration': 'learnerregistration',
+        '/learner-dashboard': 'learnerdashboard',
+        '/signin': 'signin',
+        '/sign-in': 'signin',
+        '/get-started': 'getstarted',
+        '/dashboard': 'userdashboard',
+        '/documentation': 'documentation',
+        '/solutions': 'solutions',
+        '/resources': 'resources',
+        '/jobs': 'jobs',
+        '/open-positions': 'openpositions',
+        '/project-development': 'projectdevelopment',
+        '/data-flow-management': 'dataflowmanagement',
+        '/language-learning': 'languagelearning',
+        '/capsmush-login': 'capsmushlogin',
+        '/': 'home',
       };
       const page = pathMap[window.location.pathname] || 'home';
       _setActivePage(page);
@@ -421,7 +441,22 @@ function App() {
                     <div className="icon-box">{cat.icon}</div>
                     <h3>{cat.name}</h3>
                     <p>{cat.desc}</p>
-                    <a href="#" className="card-link" onClick={(e) => { e.preventDefault(); setActivePage('notfound'); }}>
+                    <a href="#" className="card-link" onClick={(e) => {
+                      e.preventDefault();
+                      if (!session) {
+                        setAuthBanner('Please sign in to access this category.');
+                        setTimeout(() => setAuthBanner(null), 4000);
+                        setActivePage('signin');
+                      } else if (cat.name === 'Project Development') {
+                        setActivePage('projectdevelopment');
+                      } else if (cat.name === 'Data Flow Management') {
+                        setActivePage('dataflowmanagement');
+                      } else if (cat.name === 'Language Learning') {
+                        setActivePage('languagelearning');
+                      } else {
+                        setActivePage('notfound');
+                      }
+                    }}>
                       Explore <ArrowRight size={14} />
                     </a>
                   </div>
@@ -488,7 +523,7 @@ function App() {
 
                   <div className="progress-card">
                     <div className="progress-header">
-                      <span>Cloud Architecture 101</span>
+                      <span>Full Stack Development</span>
                       <span className="progress-percent">75%</span>
                     </div>
                     <div className="progress-bar-bg">
@@ -498,7 +533,7 @@ function App() {
 
                   <div className="progress-card">
                     <div className="progress-header">
-                      <span>Data Hub Management</span>
+                      <span>UI/UX Design</span>
                       <span className="progress-label">Next: Chapter 4</span>
                     </div>
                     <div className="progress-bar-bg">
@@ -655,6 +690,14 @@ function App() {
           <LearnerRegistration setActivePage={setActivePage} />
         ) : activePage === 'learnerdashboard' ? (
           <LearnerDashboard setActivePage={setActivePage} />
+        ) : activePage === 'projectdevelopment' ? (
+          <ProjectDevelopment setActivePage={setActivePage} />
+        ) : activePage === 'dataflowmanagement' ? (
+          <DataFlowManagement setActivePage={setActivePage} />
+        ) : activePage === 'languagelearning' ? (
+          <LanguageLearning setActivePage={setActivePage} />
+        ) : activePage === 'capsmushlogin' ? (
+          <CapsMushLogin />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}

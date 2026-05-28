@@ -1,0 +1,594 @@
+/* =====================================================
+   ProjectDevelopment.css — Premium precision layout
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+.pd-root {
+  font-family: 'Inter', sans-serif;
+  color: #0d0f12;
+  background: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+.pd-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3rem;
+  height: 60px;
+  border-bottom: 1px solid #ebebed;
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.pd-nav-brand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #2f6be8;
+  letter-spacing: -0.03em;
+}
+.pd-nav-links {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+.pd-nav-links span {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.pd-nav-links span:hover,
+.pd-nav-active {
+  color: #0d0f12 !important;
+}
+.pd-nav-active {
+  border-bottom: 2px solid #2f6be8;
+  padding-bottom: 2px;
+}
+.pd-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.pd-nav-search-icon {
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+/* ── BUTTONS ── */
+.pd-btn-primary {
+  background: #2f6be8;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.pd-btn-primary:hover {
+  background: #2558cc;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(47, 107, 232, 0.35);
+}
+.pd-btn-secondary {
+  background: transparent;
+  color: #0d0f12;
+  border: 1.5px solid #d1d5db;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.pd-btn-secondary:hover {
+  border-color: #2f6be8;
+  color: #2f6be8;
+  transform: translateY(-1px);
+}
+.pd-btn-outline {
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  padding: 0.7rem 1.6rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.pd-btn-outline:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* ── HERO ── */
+.pd-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: 5rem 3rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pd-hero-left {
+  flex: 1;
+  max-width: 50%;
+}
+.pd-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #2f6be8;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: block;
+}
+.pd-hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: #0d0f12;
+  margin: 0.75rem 0 1.25rem;
+  letter-spacing: -0.03em;
+}
+.pd-hero-desc {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+.pd-hero-actions {
+  display: flex;
+  gap: 1rem;
+}
+.pd-hero-right {
+  flex: 1;
+  max-width: 48%;
+  position: relative;
+}
+.pd-hero-img {
+  width: 100%;
+  border-radius: 1.25rem;
+  object-fit: cover;
+  height: 320px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+.pd-hero-badge {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 0.45rem 0.9rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ── BLUEPRINT SECTION ── */
+.pd-blueprint-section {
+  background: #f9fafb;
+  border-top: 1px solid #ebebed;
+  border-bottom: 1px solid #ebebed;
+  padding: 4rem 3rem;
+}
+.pd-blueprint-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.pd-section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0d0f12;
+  letter-spacing: -0.02em;
+}
+.pd-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  width: 280px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.pd-search-bar input {
+  border: none;
+  outline: none;
+  font-size: 0.8rem;
+  color: #374151;
+  flex: 1;
+  background: transparent;
+}
+.pd-search-icons {
+  display: flex;
+  gap: 0.25rem;
+}
+.pd-search-icon-btn {
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* Blueprint card grid */
+.pd-blueprint-grid-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.pd-blueprint-grid-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+.pd-blueprint-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.875rem;
+  padding: 1.75rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.pd-blueprint-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
+  transform: translateY(-2px);
+}
+.pd-blueprint-card--large {
+  min-height: 180px;
+}
+.pd-blueprint-card--small {
+  min-height: 130px;
+}
+.pd-highlight {
+  background: #2f6be8 !important;
+  border-color: #2f6be8 !important;
+  color: #ffffff;
+}
+.pd-highlight h3,
+.pd-highlight p {
+  color: #ffffff !important;
+}
+.pd-bp-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  background: #eff6ff;
+  color: #2f6be8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.pd-bp-icon--light {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+.pd-blueprint-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0d0f12;
+  margin: 0 0 0.5rem;
+}
+.pd-blueprint-card p {
+  font-size: 0.82rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+.pd-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2f6be8;
+  text-decoration: none;
+  transition: gap 0.2s;
+}
+.pd-card-link:hover {
+  gap: 0.5rem;
+}
+
+/* ── CURATION SECTION ── */
+.pd-curation-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 4rem;
+  padding: 5rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pd-curation-left {
+  flex: 1.2;
+}
+.pd-curation-title {
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #0d0f12;
+  margin-bottom: 1rem;
+}
+.pd-curation-body {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+.pd-curation-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.pd-curation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+.pd-curation-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+  background: #eff6ff;
+  color: #2f6be8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pd-curation-item strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0d0f12;
+  margin-bottom: 0.2rem;
+}
+.pd-curation-item p {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+.pd-curation-images {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.pd-curation-img {
+  width: 100%;
+  border-radius: 1rem;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+}
+.pd-curation-img--top {
+  height: 200px;
+}
+.pd-curation-img--bottom {
+  height: 160px;
+}
+
+/* ── LIFECYCLE SECTION ── */
+.pd-lifecycle-section {
+  background: #f9fafb;
+  border-top: 1px solid #ebebed;
+  padding: 5rem 3rem;
+}
+.pd-lifecycle-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+.pd-lifecycle-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0d0f12;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+.pd-lifecycle-header p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+.pd-lifecycle-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.pd-lifecycle-step {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1.75rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.pd-lifecycle-step:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+.pd-lifecycle-step--active {
+  border-color: #2f6be8;
+  box-shadow: 0 0 0 3px rgba(47, 107, 232, 0.12);
+}
+.pd-step-num {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #9ca3af;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.pd-step-num--active {
+  color: #2f6be8;
+}
+.pd-lifecycle-step h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0d0f12;
+  margin: 0 0 0.6rem;
+}
+.pd-lifecycle-step p {
+  font-size: 0.82rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── CTA SECTION ── */
+.pd-cta-section {
+  background: #0d0f12;
+  padding: 6rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.pd-cta-section::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(47, 107, 232, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.pd-cta-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.pd-cta-icon {
+  color: #2f6be8;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 12px rgba(47, 107, 232, 0.5));
+}
+.pd-cta-content h2 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.pd-cta-content p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+.pd-cta-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* ── FOOTER ── */
+.pd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 3rem;
+  border-top: 1px solid #ebebed;
+  background: #ffffff;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.pd-footer-brand {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #2f6be8;
+}
+.pd-footer-links {
+  display: flex;
+  gap: 1.5rem;
+}
+.pd-footer-links a {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.pd-footer-links a:hover {
+  color: #0d0f12;
+}
+.pd-footer-copy {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .pd-hero {
+    flex-direction: column;
+    padding: 3rem 1.5rem;
+  }
+  .pd-hero-left,
+  .pd-hero-right {
+    max-width: 100%;
+  }
+  .pd-blueprint-grid-top {
+    grid-template-columns: 1fr;
+  }
+  .pd-blueprint-grid-bottom {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pd-curation-section {
+    flex-direction: column;
+    padding: 3rem 1.5rem;
+  }
+  .pd-lifecycle-steps {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pd-nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .pd-blueprint-grid-bottom {
+    grid-template-columns: 1fr;
+  }
+  .pd-lifecycle-steps {
+    grid-template-columns: 1fr;
+  }
+  .pd-cta-content h2 {
+    font-size: 1.75rem;
+  }
+  .pd-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pd-footer-links {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}

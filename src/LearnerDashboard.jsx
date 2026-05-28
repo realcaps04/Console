@@ -197,6 +197,62 @@ const LearnerDashboard = ({ setActivePage }) => {
     RESOURCES[(resourceIdx + 2) % RESOURCES.length],
   ];
 
+  const learnerGoalCopy = {
+    skills: 'Build job-ready depth with curated learning tracks and practical labs.',
+    career: 'Accelerate your next role with guided pathways that sharpen real-world delivery.',
+    certification: 'Prepare for certification milestones with focused modules and hands-on drills.',
+    portfolio: 'Create standout project work with courses that move from fundamentals to shipping.',
+  };
+
+  const focusAreas = areas.length ? areas : ['Frontend Foundations', 'Backend APIs', 'Cloud Deployment'];
+
+  const SKILL_PATHS = [
+    {
+      id: 'frontend-accelerator',
+      tag: 'TOP PICK',
+      title: 'Frontend Engineering Accelerator',
+      description: 'Sharpen component architecture, performance, accessibility, and production React patterns.',
+      duration: '8 weeks',
+      format: '24 guided lessons',
+      icon: <Code size={18} />,
+      accent: '#3b5fe2',
+      bg: '#eef2ff',
+    },
+    {
+      id: 'backend-systems',
+      tag: 'IN DEMAND',
+      title: 'Backend & API Systems',
+      description: 'Master service design, authentication, database integration, and resilient API workflows.',
+      duration: '6 weeks',
+      format: '18 practical labs',
+      icon: <Database size={18} />,
+      accent: '#0f766e',
+      bg: '#ecfeff',
+    },
+    {
+      id: 'team-collab',
+      tag: 'CAREER',
+      title: 'Engineering Collaboration Skills',
+      description: 'Improve review habits, team communication, delivery planning, and developer workflow habits.',
+      duration: '4 weeks',
+      format: '12 live workshops',
+      icon: <Users size={18} />,
+      accent: '#9333ea',
+      bg: '#f5f3ff',
+    },
+    {
+      id: 'cloud-foundations',
+      tag: 'GROWTH',
+      title: 'Cloud Deployment Foundations',
+      description: 'Learn hosting, CI/CD, observability, and deployment thinking for production-ready apps.',
+      duration: '5 weeks',
+      format: '15 deployment exercises',
+      icon: <UploadCloud size={18} />,
+      accent: '#ea580c',
+      bg: '#fff7ed',
+    },
+  ];
+
   return (
     <div className="ld-root">
 
@@ -244,6 +300,7 @@ const LearnerDashboard = ({ setActivePage }) => {
             { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
             { key: 'courses', label: 'My Courses', icon: <BookOpen size={18} /> },
             { key: 'assignments', label: 'Assignments', icon: <ClipboardList size={18} /> },
+            { key: 'skills', label: 'Skills', icon: <Sparkles size={18} /> },
             { key: 'notes', label: 'Notes', icon: <StickyNote size={18} /> },
             { key: 'support', label: 'Support', icon: <HelpCircle size={18} /> },
             { key: 'live', label: 'Live Sessions', icon: <Video size={18} /> },
@@ -362,13 +419,13 @@ const LearnerDashboard = ({ setActivePage }) => {
                   ))}
 
                   {/* Enroll CTA card */}
-                  <div className="mc-enroll-card">
+                  <button className="mc-enroll-card" onClick={() => setActiveNav('skills')}>
                     <div className="mc-enroll-icon">
                       <Plus size={28} />
                     </div>
                     <h4 className="mc-enroll-title">Enroll in New Course</h4>
                     <p className="mc-enroll-sub">Explore 200+ technical modules in our catalog.</p>
-                  </div>
+                  </button>
                 </div>
               </div>
             );
@@ -702,6 +759,109 @@ const LearnerDashboard = ({ setActivePage }) => {
               )}
             </div>
           )}
+
+          {activeNav === 'skills' && (
+            <div className="sk-page">
+              <section className="sk-hero">
+                <div className="sk-hero-copy">
+                  <span className="sk-eyebrow">ENROLLMENT HUB</span>
+                  <h1 className="sk-title">Explore your next skills path</h1>
+                  <p className="sk-subtitle">
+                    {learnerGoalCopy[goal] || learnerGoalCopy.skills} Choose a pathway, enroll, and keep building momentum from one place.
+                  </p>
+
+                  <div className="sk-focus-row">
+                    {focusAreas.map((area) => (
+                      <span key={area} className="sk-focus-chip">{area}</span>
+                    ))}
+                  </div>
+
+                  <div className="sk-hero-actions">
+                    <button className="sk-primary-btn">Browse all pathways</button>
+                    <button className="sk-secondary-btn" onClick={() => setActiveNav('courses')}>
+                      Back to My Courses
+                    </button>
+                  </div>
+                </div>
+
+                <div className="sk-hero-panel">
+                  <div className="sk-stat-card">
+                    <span className="sk-stat-label">Recommended now</span>
+                    <strong className="sk-stat-value">{SKILL_PATHS.length} skill tracks</strong>
+                    <span className="sk-stat-sub">Matched to your current learner profile</span>
+                  </div>
+                  <div className="sk-stat-card">
+                    <span className="sk-stat-label">Weekly pace</span>
+                    <strong className="sk-stat-value">5-7 hrs</strong>
+                    <span className="sk-stat-sub">Designed to fit consistent after-class progress</span>
+                  </div>
+                  <div className="sk-stat-card sk-stat-card--accent">
+                    <Sparkles size={18} />
+                    <div>
+                      <strong>Skill boost mode</strong>
+                      <p>Blend hands-on lessons, assignments, and live sessions inside one pathway.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section className="sk-section">
+                <div className="sk-section-header">
+                  <div>
+                    <h2 className="sk-section-title">Recommended for you</h2>
+                    <p className="sk-section-subtitle">Each path is ready for enrollment and tailored to practical technical growth.</p>
+                  </div>
+                </div>
+
+                <div className="sk-grid">
+                  {SKILL_PATHS.map((path) => (
+                    <article key={path.id} className="sk-card">
+                      <div className="sk-card-top">
+                        <span className="sk-card-tag">{path.tag}</span>
+                        <span className="sk-card-icon" style={{ background: path.bg, color: path.accent }}>
+                          {path.icon}
+                        </span>
+                      </div>
+
+                      <h3 className="sk-card-title">{path.title}</h3>
+                      <p className="sk-card-desc">{path.description}</p>
+
+                      <div className="sk-card-meta">
+                        <span>{path.duration}</span>
+                        <span>{path.format}</span>
+                      </div>
+
+                      <button className="sk-enroll-btn">Enroll now</button>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="sk-roadmap">
+                <div className="sk-roadmap-copy">
+                  <span className="sk-eyebrow sk-eyebrow--muted">NEXT STEPS</span>
+                  <h2 className="sk-section-title">Build a stronger weekly learning rhythm</h2>
+                  <p className="sk-section-subtitle">
+                    Start with one focused pathway, complete the related assignments, and use live sessions to reinforce difficult topics faster.
+                  </p>
+                </div>
+
+                <div className="sk-roadmap-steps">
+                  {[
+                    'Choose one pathway aligned with your current goal.',
+                    'Complete the first lesson and schedule your practice block.',
+                    'Track your assignments and return to My Courses to continue.',
+                  ].map((step, index) => (
+                    <div key={step} className="sk-step-card">
+                      <span className="sk-step-index">0{index + 1}</span>
+                      <p>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
           {/* ═══════════════════════════════
                MODULE VIEW
           ═══════════════════════════════ */}
