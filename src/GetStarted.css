@@ -6,6 +6,7 @@
   min-height: 100vh;
   background-color: #eef0f4;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 3rem 2rem;
@@ -75,14 +76,9 @@
   font-weight: 600;
   color: #475569;
   cursor: pointer;
-  transition: all 0.15s ease;
-  width: fit-content;
-}
-
-.gs-back-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1.25rem;
 }
 
 .gs-tagline {

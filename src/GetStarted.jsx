@@ -95,15 +95,15 @@ export default function GetStarted({ setActivePage }) {
         </svg>
       </div>
 
+      <button className="gs-back-btn" onClick={() => setActivePage('home')}>
+        <ArrowLeft size={15} />
+        Back to Home
+      </button>
+
       <div className="gs-layout">
         {/* Left Panel */}
         <aside className="gs-left">
           <div className="gs-left-top">
-            <button className="gs-back-btn" onClick={() => setActivePage('home')}>
-              <ArrowLeft size={15} />
-              Back to Home
-            </button>
-
             <h2 className="gs-brand">Console</h2>
             <p className="gs-tagline">
               Join the architectural interface for next-generation engineering teams.
