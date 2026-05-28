@@ -15,7 +15,6 @@ import LearnerDashboard from './LearnerDashboard';
 import ProjectDevelopment from './ProjectDevelopment';
 import DataFlowManagement from './DataFlowManagement';
 import LanguageLearning from './LanguageLearning';
-import CapsMushLogin from './CapsMushLogin';
 import './App.css';
 import {
   LayoutDashboard,
@@ -108,7 +107,6 @@ function App() {
       'projectdevelopment': '/project-development',
       'dataflowmanagement': '/data-flow-management',
       'languagelearning': '/language-learning',
-      'capsmushlogin': '/capsmush-login',
     };
 
     const params = new URLSearchParams(window.location.search);
@@ -136,7 +134,6 @@ function App() {
       '/project-development': 'projectdevelopment',
       '/data-flow-management': 'dataflowmanagement',
       '/language-learning': 'languagelearning',
-      '/capsmush-login': 'capsmushlogin',
       '/': 'home'
     };
     const fromPath = pathMap[window.location.pathname];
@@ -164,7 +161,6 @@ function App() {
     'projectdevelopment': '/project-development',
     'dataflowmanagement': '/data-flow-management',
     'languagelearning': '/language-learning',
-    'capsmushlogin': '/capsmush-login',
     'home': '/',
   };
 
@@ -213,7 +209,6 @@ function App() {
         '/project-development': 'projectdevelopment',
         '/data-flow-management': 'dataflowmanagement',
         '/language-learning': 'languagelearning',
-        '/capsmush-login': 'capsmushlogin',
         '/': 'home',
       };
       const page = pathMap[window.location.pathname] || 'home';
@@ -696,8 +691,6 @@ function App() {
           <DataFlowManagement setActivePage={setActivePage} />
         ) : activePage === 'languagelearning' ? (
           <LanguageLearning setActivePage={setActivePage} />
-        ) : activePage === 'capsmushlogin' ? (
-          <CapsMushLogin />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}
