@@ -29,8 +29,7 @@ export default function SignIn({ setActivePage }) {
       setErrorMsg(error.message);
     } else {
       setSuccessMsg("Welcome back!");
-      // Example transition to dashboard: setTimeout(() => setActivePage('dashboard'), 1000);
-      setActivePage('home'); // temporary target until dashboard exists
+      setActivePage('home');
     }
   };
 

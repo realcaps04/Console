@@ -106,7 +106,7 @@ export default function GetStarted({ setActivePage }) {
         // Redirect after success
         setTimeout(() => {
           if (data.session) {
-            setActivePage('userdashboard');
+            setActivePage('home');
           } else {
             setActivePage('home');
           }
