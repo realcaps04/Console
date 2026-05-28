@@ -57,24 +57,65 @@ export default function GetStarted({ setActivePage }) {
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+          }
         }
+      });
+
+      setLoading(false);
+
+      if (error) {
+        console.error('Signup error:', error);
+        if (error.status === 429 || error.message?.toLowerCase().includes('rate limit')) {
+          setErrorMsg('Too many sign-up attempts. Please wait a few minutes and try again.');
+        } else if (error.message?.toLowerCase().includes('already registered') || error.message?.toLowerCase().includes('already exists')) {
+          setErrorMsg('An account with this email already exists. Sign in instead.');
+        } else {
+          setErrorMsg(error.message);
+        }
+        return;
       }
-    });
 
-    setLoading(false);
+      if (data.user) {
+        console.log('User created successfully:', data.user);
+        
+        // Check if user was inserted into public.users table
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
 
-    if (error) {
-      setErrorMsg(error.message);
-    } else {
-      // Automatic login to dashboard if email confirmations are disabled
-      setActivePage('home');
+        if (profileError) {
+          console.error('Profile check error:', profileError);
+          // User was created in auth but not in public.users - this indicates trigger issue
+          setErrorMsg('Account created but profile setup failed. Please contact support.');
+          return;
+        }
+
+        console.log('User profile created:', userProfile);
+        setSuccessMsg('Account created successfully! Redirecting...');
+        
+        // Redirect after success
+        setTimeout(() => {
+          if (data.session) {
+            setActivePage('userdashboard');
+          } else {
+            setActivePage('home');
+          }
+        }, 1500);
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error('Unexpected error:', err);
+      setErrorMsg('Something went wrong. Please try again.');
     }
   };
 
