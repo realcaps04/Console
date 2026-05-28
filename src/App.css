@@ -769,12 +769,9 @@
 }
 
 .video-placeholder {
-  background-color: #27272a;
   border-radius: var(--radius-xl);
   height: 350px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   box-shadow: var(--shadow-lg);
 }
 

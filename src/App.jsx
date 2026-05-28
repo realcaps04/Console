@@ -612,7 +612,16 @@ function App() {
                 </div>
 
                 <div className="video-placeholder">
-                  <div className="play-button"></div>
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/GxmfcnU3feo"
+                    title="Console Learning Platform"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ borderRadius: '0.75rem', display: 'block' }}
+                  />
                 </div>
               </div>
             </section>
