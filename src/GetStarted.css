@@ -433,141 +433,71 @@
     text-align: center;
   }
 }
-
-/* ── Input wrapper states ── */
-.gs-input-wrap {
-  position: relative;
+/* ── Password Mismatch Popup ── */
+.gs-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.gs-input-wrap input {
-  width: 100%;
-  padding: 0.85rem 2.5rem 0.85rem 1rem;
-  background: #f3f4f6;
-  border: 1.5px solid transparent;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  color: #0f172a;
-  outline: none;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  box-sizing: border-box;
-}
-
-.gs-input-wrap input:focus {
+.gs-popup {
   background: #ffffff;
-  border-color: #2f6be8;
-  box-shadow: 0 0 0 3px rgba(47, 107, 232, 0.1);
-}
-
-.gs-input-wrap--error input,
-.gs-input-wrap--error input:focus {
-  border-color: #ef4444;
-  background: #fff8f8;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
-}
-
-.gs-input-wrap--ok input {
-  border-color: #10b981;
-  background: #f0fdf4;
-}
-
-.gs-field-check {
-  position: absolute;
-  right: 0.75rem;
-  color: #10b981;
-  pointer-events: none;
-  flex-shrink: 0;
-}
-
-/* ── Inline field error ── */
-.gs-field-error {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.78rem;
-  color: #ef4444;
-  font-weight: 500;
-  margin-top: 0.25rem;
-}
-
-/* ── Password strength ── */
-.gs-strength {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: -0.75rem;
-}
-
-.gs-strength-track {
-  flex: 1;
-  height: 4px;
-  background: #e5e7eb;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.gs-strength-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-
-.gs-strength-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  white-space: nowrap;
-  min-width: 72px;
-  text-align: right;
-}
-
-/* ── Alert with icon ── */
-.gs-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-/* ── Success state ── */
-.gs-success-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 1rem;
-  padding: 3rem 1rem;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
   text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: popupSlide 0.3s ease-out;
 }
 
-.gs-success-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #f0fdf4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.gs-popup-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
-.gs-success-state h3 {
-  font-size: 1.4rem;
-  font-weight: 800;
+.gs-popup h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #0f172a;
-  margin: 0;
+  margin: 0 0 0.5rem;
 }
 
-.gs-success-state p {
+.gs-popup p {
   font-size: 0.9rem;
   color: #64748b;
-  margin: 0;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
 }
 
-/* Override old gs-field input styles since gs-input-wrap now handles it */
-.gs-field input {
-  all: unset;
+.gs-popup-btn {
+  background: #2f6be8;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.gs-popup-btn:hover {
+  background: #2558cc;
+}
+
+@keyframes popupSlide {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
