@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Eye, EyeOff, ArrowRight, X, Loader2
+  Eye, EyeOff, ArrowRight, X, Loader2, ArrowLeft
 } from 'lucide-react';
 import { supabase } from './utils/supabase';
 import './GetStarted.css';
@@ -99,7 +99,12 @@ export default function GetStarted({ setActivePage }) {
         {/* Left Panel */}
         <aside className="gs-left">
           <div className="gs-left-top">
-            <h2 className="gs-brand" onClick={() => setActivePage('home')}>Console</h2>
+            <button className="gs-back-btn" onClick={() => setActivePage('home')}>
+              <ArrowLeft size={15} />
+              Back to Home
+            </button>
+
+            <h2 className="gs-brand">Console</h2>
             <p className="gs-tagline">
               Join the architectural interface for next-generation engineering teams.
             </p>

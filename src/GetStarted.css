@@ -60,15 +60,36 @@
   font-weight: 900;
   color: #0f172a;
   margin: 0;
-  cursor: pointer;
   letter-spacing: -0.02em;
+}
+
+.gs-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: fit-content;
+}
+
+.gs-back-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
 .gs-tagline {
   font-size: 0.92rem;
   color: #475569;
-  line-height: 1.6;
-  margin: -1rem 0 0;
+  line-height: 1.65;
+  margin: 0;
 }
 
 .gs-continue-label {
@@ -143,8 +164,9 @@
 .gs-terms {
   font-size: 0.82rem;
   color: #64748b;
-  line-height: 1.6;
+  line-height: 1.65;
   margin: 0;
+  word-break: break-word;
 }
 
 .gs-link {
