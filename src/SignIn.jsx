@@ -95,7 +95,7 @@ export default function SignIn({ setActivePage }) {
 
             <p className="signin-create-account">
               New to the platform?{' '}
-              <span className="signin-create-link" onClick={() => setActivePage('notfound')}>Create an Account</span>
+              <span className="signin-create-link" onClick={() => setActivePage('getstarted')}>Create an Account</span>
             </p>
           </div>
 
