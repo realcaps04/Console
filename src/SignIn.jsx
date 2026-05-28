@@ -147,12 +147,6 @@ export default function SignIn({ setActivePage }) {
               <button type="submit" className="signin-submit-btn" disabled={loading}>
                 {loading ? <Loader2 size={16} className="gs-spin" /> : 'Sign In'}
               </button>
-
-              <div className="signin-encrypted">
-                <div className="encrypted-line"></div>
-                <span>ENCRYPTED CONNECTION</span>
-                <div className="encrypted-line"></div>
-              </div>
             </form>
           </div>
         </div>
