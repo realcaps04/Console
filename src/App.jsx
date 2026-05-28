@@ -329,8 +329,8 @@ function App() {
       {/* Main Content */}
       <main className="main-content">
 
-        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard, OpenPositions, LearnerLogin, and LearnerRegistration pages */}
-        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && activePage !== 'learnerdashboard' && (
+        {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard, OpenPositions, LearnerLogin, LearnerRegistration, ProjectDevelopment, DataFlowManagement and LanguageLearning pages */}
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && activePage !== 'learnerdashboard' && activePage !== 'projectdevelopment' && activePage !== 'dataflowmanagement' && activePage !== 'languagelearning' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
