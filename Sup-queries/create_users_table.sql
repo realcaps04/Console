@@ -41,6 +41,11 @@ begin
     new.email
   );
   return new;
+exception
+  when others then
+    -- Log the error but don't fail the auth signup
+    raise log 'Error in handle_new_user trigger: %', sqlerrm;
+    return new;
 end;
 $$;
 

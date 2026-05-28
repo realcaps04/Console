@@ -2024,3 +2024,117 @@
   .lr-modal-title { font-size: 1.5rem; }
   .lr-modal-statusbar { flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
 }
+
+/* ── Conflict Popup ── */
+.lr-conflict-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.lr-conflict-popup {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.25s ease-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.92) translateY(-12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.lr-conflict-icon {
+  font-size: 2.75rem;
+  margin-bottom: 1rem;
+}
+
+.lr-conflict-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.75rem;
+}
+
+.lr-conflict-body {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0 0 1.5rem;
+}
+
+.lr-conflict-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.6rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  text-align: center;
+  letter-spacing: 0.05em;
+  transition: border-color 0.15s;
+  margin-bottom: 0.5rem;
+}
+
+.lr-conflict-input:focus {
+  border-color: #3b5fe2;
+  box-shadow: 0 0 0 3px rgba(59, 95, 226, 0.1);
+}
+
+.lr-conflict-error {
+  font-size: 0.8rem;
+  color: #ef4444;
+  margin: 0 0 1rem;
+}
+
+.lr-conflict-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.lr-conflict-cancel {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lr-conflict-confirm {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: #3b5fe2;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lr-conflict-confirm:hover {
+  background: #2d4fd4;
+}
+
+.lr-conflict-confirm:disabled,
+.lr-conflict-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

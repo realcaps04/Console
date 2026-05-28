@@ -102,6 +102,12 @@ const LearnerRegistration = ({ setActivePage }) => {
   const STEP_COUNT = 4;
   const [stepStates, setStepStates] = useState(Array(STEP_COUNT).fill('queue'));
 
+  // Existing-user conflict popup state
+  const [showConflictPopup, setShowConflictPopup] = useState(false);
+  const [conflictConfirmText, setConflictConfirmText] = useState('');
+  const [conflictLoading, setConflictLoading] = useState(false);
+  const [conflictError, setConflictError] = useState('');
+
   // Trajectory state
   const [selectedGoal, setSelectedGoal] = useState(() => SS.goal());
   const [selectedAreas, setSelectedAreas] = useState(() => SS.areas() || ['Frontend', 'UI/UX Design', 'DevOps']);
@@ -284,8 +290,28 @@ const LearnerRegistration = ({ setActivePage }) => {
   };
 
   /* Finalize Account → show modal, animate steps, then insert */
-  const handleFinalize = () => {
+  const handleFinalize = async () => {
     if (submitState === 'success') return;   // already registered
+
+    // ── Pre-check: does a user account already exist with this email? ──
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id, is_learner')
+      .eq('email', form.email.trim().toLowerCase())
+      .maybeSingle();
+
+    if (existingUser && !existingUser.is_learner) {
+      // A platform user exists with this email but is NOT yet a learner
+      setShowConflictPopup(true);
+      return;
+    }
+
+    // No conflict — proceed with registration
+    runRegistration();
+  };
+
+  /* Called after conflict is confirmed OR directly when no conflict */
+  const runRegistration = () => {
     setShowModal(true);
     setSubmitError('');
     setSubmitState('loading');
@@ -303,27 +329,41 @@ const LearnerRegistration = ({ setActivePage }) => {
     setTimeout(() => setStep(2, 'processing'), 3300);
     setTimeout(() => setStep(2, 'verified'), 4400);
 
-    // Step 3: Finalizing Atelier — DB insert fires here
+    // Step 3: Finalizing Atelier — Auth signup + DB insert fires here
     setTimeout(() => setStep(3, 'processing'), 4700);
     setTimeout(async () => {
       try {
-        const payload = {
-          first_name: form.firstName.trim(),
-          last_name: form.lastName.trim(),
+        // Step 1: Create auth user (password is bcrypt-hashed by Supabase)
+        const { data: authData, error: authError } = await supabase.auth.signUp({
           email: form.email.trim().toLowerCase(),
-          password_hash: form.password,
-          qualification: form.qualification,
-          primary_goal: selectedGoal,
-          focus_areas: selectedAreas,
-          agreed_terms: form.agreed,
-          // created_at omitted — DB default now() handles it
-        };
+          password: form.password,
+          options: {
+            data: {
+              first_name: form.firstName.trim(),
+              last_name: form.lastName.trim(),
+              role: 'learner',
+            }
+          }
+        });
 
-        const { error } = await supabase
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('Account creation failed. Please try again.');
+
+        // Step 2: Insert learner profile into public.Learners (no password stored)
+        const { error: profileError } = await supabase
           .from('Learners')
-          .insert([payload]);
+          .insert([{
+            id:            authData.user.id,
+            first_name:    form.firstName.trim(),
+            last_name:     form.lastName.trim(),
+            email:         form.email.trim().toLowerCase(),
+            qualification: form.qualification,
+            primary_goal:  selectedGoal,
+            focus_areas:   selectedAreas,
+            agreed_terms:  form.agreed,
+          }]);
 
-        if (error) throw error;
+        if (profileError) throw profileError;
 
         setStep(3, 'verified');
         setSubmitState('success');
@@ -346,6 +386,34 @@ const LearnerRegistration = ({ setActivePage }) => {
         setSubmitState('error');
       }
     }, 5200);
+  };
+
+  /* Handle conflict popup confirmation — user types "confirm" to proceed */
+  const handleConflictConfirm = async () => {
+    if (conflictConfirmText.trim().toLowerCase() !== 'confirm') {
+      setConflictError('Please type "confirm" exactly to proceed.');
+      return;
+    }
+    setConflictLoading(true);
+    setConflictError('');
+    try {
+      // Update is_learner = true in users table for this email
+      const { error } = await supabase
+        .from('users')
+        .update({ is_learner: true })
+        .eq('email', form.email.trim().toLowerCase());
+
+      if (error) throw error;
+
+      setShowConflictPopup(false);
+      setConflictConfirmText('');
+      // Now proceed with full learner registration
+      runRegistration();
+    } catch (err) {
+      setConflictError('Failed to update account. Please try again.');
+    } finally {
+      setConflictLoading(false);
+    }
   };
 
 
@@ -669,6 +737,48 @@ const qualLabel = qualObj ? qualObj.label.replace(/^.{2,4}\s+/, '') : '—';
 return (
   <div className="lr-page">
     <Stepper activeStep={3} />
+
+    {/* ══ Conflict Popup — existing platform user with same email ══ */}
+    {showConflictPopup && (
+      <div className="lr-conflict-overlay">
+        <div className="lr-conflict-popup">
+          <div className="lr-conflict-icon">⚠️</div>
+          <h3 className="lr-conflict-title">Account Already Exists</h3>
+          <p className="lr-conflict-body">
+            A <strong>Console platform user</strong> already exists with the email{' '}
+            <strong>{form.email.trim().toLowerCase()}</strong>.<br /><br />
+            If this is you and you want to also enroll as a learner, type{' '}
+            <strong>"confirm"</strong> below to link both accounts.
+          </p>
+          <input
+            className="lr-conflict-input"
+            type="text"
+            placeholder='Type "confirm" to proceed'
+            value={conflictConfirmText}
+            onChange={(e) => { setConflictConfirmText(e.target.value); setConflictError(''); }}
+          />
+          {conflictError && (
+            <p className="lr-conflict-error">{conflictError}</p>
+          )}
+          <div className="lr-conflict-actions">
+            <button
+              className="lr-conflict-cancel"
+              onClick={() => { setShowConflictPopup(false); setConflictConfirmText(''); setConflictError(''); }}
+              disabled={conflictLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className="lr-conflict-confirm"
+              onClick={handleConflictConfirm}
+              disabled={conflictLoading}
+            >
+              {conflictLoading ? 'Updating...' : 'Confirm & Continue'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* ══ Validation Modal Overlay ══ */}
     {showModal && (() => {
