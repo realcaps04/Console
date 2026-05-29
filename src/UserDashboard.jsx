@@ -6,13 +6,19 @@ import {
   FileText, Banknote, History, Filter, Zap,
   Phone, Paperclip, Smile, Image as ImageIcon, Download, 
   Info, Star, Flag, Check, Clock, Folder, ChevronRight, HelpCircle, Database,
-  Pencil, ShieldCheck, Palette, Command, RotateCcw, Menu
+  Pencil, ShieldCheck, Palette, Command, RotateCcw, Menu, LogOut
 } from 'lucide-react';
+import { supabase } from './utils/supabase';
 import './UserDashboard.css';
 
 export default function UserDashboard({ session, setActivePage, initialTab = 'overview' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setActivePage('home');
+  };
 
   const firstName = session?.user?.user_metadata?.first_name || 'Adrian';
   const lastName = session?.user?.user_metadata?.last_name || 'Sterling';
@@ -56,6 +62,9 @@ export default function UserDashboard({ session, setActivePage, initialTab = 'ov
           </div>
           <div className={`dash-nav-item ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
             <User size={18} /> Profile
+          </div>
+          <div className="dash-nav-item" onClick={handleLogout} style={{ marginTop: 'auto', color: '#ef4444' }}>
+            <LogOut size={18} /> Logout
           </div>
         </nav>
 

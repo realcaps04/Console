@@ -107,9 +107,7 @@ const LearnerLogin = ({ setActivePage }) => {
         {/* Right form panel */}
         <div className="ll-right-panel">
           <div className="ll-form-card">
-            <div className="ll-icon-wrap">
-              <Terminal size={22} color="#3b5fe2" />
-            </div>
+
 
             <h2 className="ll-form-title">Welcome Back, Learner</h2>
             <p className="ll-form-sub">Continue your path to technical mastery.</p>
