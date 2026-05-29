@@ -37,7 +37,8 @@ import {
   ChevronLeft,
   ChevronDown,
   X,
-  Star
+  Star,
+  FileText
 } from 'lucide-react';
 
 const reviews = [
@@ -388,6 +389,20 @@ function App() {
               <span className={`top-nav-link ${activePage === 'home' ? 'active' : ''}`} onClick={() => setActivePage('home')}>Platform</span>
               <span className={`top-nav-link ${activePage === 'solutions' ? 'active' : ''}`} onClick={() => setActivePage('solutions')}>Solutions</span>
               <span className={`top-nav-link ${activePage === 'resources' ? 'active' : ''}`} onClick={() => setActivePage('resources')}>Resources</span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', marginRight: '1.5rem' }}>
+              <a 
+                href="https://docs.google.com/document/d/1rnHpVLBpYLghvy-kNIjuIH5BeizfAr-NyvZ3M0we7-8/edit?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                title="View Document"
+                style={{ color: '#4285F4', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'opacity 0.2s' }}
+                onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                <FileText size={22} strokeWidth={2.5} />
+              </a>
             </div>
 
             {!session ? (
