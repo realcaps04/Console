@@ -15,6 +15,7 @@ import LearnerDashboard from './LearnerDashboard';
 import ProjectDevelopment from './ProjectDevelopment';
 import DataFlowManagement from './DataFlowManagement';
 import LanguageLearning from './LanguageLearning';
+import ResetPassword from './ResetPassword';
 import './App.css';
 import {
   LayoutDashboard,
@@ -108,6 +109,7 @@ function App() {
       'projectdevelopment': '/project-development',
       'dataflowmanagement': '/data-flow-management',
       'languagelearning': '/language-learning',
+      'resetpassword': '/reset-password',
     };
 
     const params = new URLSearchParams(window.location.search);
@@ -135,6 +137,7 @@ function App() {
       '/project-development': 'projectdevelopment',
       '/data-flow-management': 'dataflowmanagement',
       '/language-learning': 'languagelearning',
+      '/reset-password': 'resetpassword',
       '/': 'home'
     };
     const fromPath = pathMap[window.location.pathname];
@@ -162,6 +165,7 @@ function App() {
     'projectdevelopment': '/project-development',
     'dataflowmanagement': '/data-flow-management',
     'languagelearning': '/language-learning',
+    'resetpassword': '/reset-password',
     'home': '/',
   };
 
@@ -265,16 +269,27 @@ function App() {
       if (session?.user) fetchLearnerStatus(session.user);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      sessionRef.current = session;
-      if (session?.user) fetchLearnerStatus(session.user);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      setSession(newSession);
+      sessionRef.current = newSession;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        _setActivePage('resetpassword');
+      } else if (event === 'SIGNED_IN') {
+        if (activePage === 'signin' || activePage === 'getstarted') {
+          _setActivePage('home');
+        }
+      } else if (event === 'SIGNED_OUT') {
+        if (PROTECTED_PAGES.includes(activePage) || activePage === 'userdashboard' || activePage === 'learnerdashboard') {
+          _setActivePage('home');
+        }
+      }
+      
+      if (newSession?.user) fetchLearnerStatus(newSession.user);
       else { setIsLearner(false); setLearnerCourses([]); }
     });
 
-    return () => subscription.unsubscribe();
+    return () => authListener.subscription.unsubscribe();
   }, []);
 
   // Fetch is_learner flag and learner courses from Supabase
@@ -377,7 +392,7 @@ function App() {
       <main className="main-content">
 
         {/* Top Navigation — hidden on Documentation, SignIn, GetStarted, UserDashboard, OpenPositions, LearnerLogin, LearnerRegistration, ProjectDevelopment, DataFlowManagement and LanguageLearning pages */}
-        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && activePage !== 'learnerdashboard' && activePage !== 'projectdevelopment' && activePage !== 'dataflowmanagement' && activePage !== 'languagelearning' && (
+        {activePage !== 'documentation' && activePage !== 'signin' && activePage !== 'getstarted' && activePage !== 'userdashboard' && activePage !== 'userprojects' && activePage !== 'openpositions' && activePage !== 'learnerlogin' && activePage !== 'learnerregistration' && activePage !== 'learnerdashboard' && activePage !== 'projectdevelopment' && activePage !== 'dataflowmanagement' && activePage !== 'languagelearning' && activePage !== 'resetpassword' && (
           <header className="top-nav">
             <div className="header-brand">
               <a href="/" style={{ textDecoration: 'none', color: '#2f6be8' }}>
@@ -802,6 +817,8 @@ function App() {
           <DataFlowManagement setActivePage={setActivePage} session={session} />
         ) : activePage === 'languagelearning' ? (
           <LanguageLearning setActivePage={setActivePage} />
+        ) : activePage === 'resetpassword' ? (
+          <ResetPassword setActivePage={setActivePage} />
         ) : (
           <NotFound setActivePage={setActivePage} previousPage={previousPage} setIsQueryModalOpen={setIsQueryModalOpen} />
         )}
