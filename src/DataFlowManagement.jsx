@@ -55,7 +55,9 @@ const supportStats = [
   { label: 'REDUNDANCY', value: 'N+2' },
 ];
 
-export default function DataFlowManagement({ setActivePage }) {
+export default function DataFlowManagement({ setActivePage, session }) {
+  // Logged-in users go to their dashboard; guests go to get-started
+  const handleCTA = () => setActivePage(session ? 'userprojects' : 'getstarted');
   const nodes = useCounter(12842, 1800);
   const [activeBar, setActiveBar] = useState(null);
 
@@ -75,7 +77,7 @@ export default function DataFlowManagement({ setActivePage }) {
         <div className="dfm-nav-right">
           <Search size={15} className="dfm-nav-icon" />
           <span className="dfm-nav-search-text">Search doc resources</span>
-          <button className="dfm-btn-primary" onClick={() => setActivePage('getstarted')}>
+          <button className="dfm-btn-primary" onClick={handleCTA}>
             Get Started
           </button>
         </div>
@@ -93,7 +95,7 @@ export default function DataFlowManagement({ setActivePage }) {
             Move beyond rigid pipelines. Our autonomous data orchestration layer adapts in real time to volume spikes and structural shifts.
           </p>
           <div className="dfm-hero-actions">
-            <button className="dfm-btn-primary" onClick={() => setActivePage('getstarted')}>Financial Update</button>
+            <button className="dfm-btn-primary" onClick={handleCTA}>Financial Update</button>
             <button className="dfm-btn-ghost" onClick={() => setActivePage('documentation')}>Technical Spec</button>
           </div>
         </div>
@@ -296,7 +298,7 @@ export default function DataFlowManagement({ setActivePage }) {
           <h2>Ready to streamline your<br />digital circulatory system?</h2>
           <p>Engineer grade data infrastructure that scales at the speed of your ambition.</p>
           <div className="dfm-cta-actions">
-            <button className="dfm-btn-primary" onClick={() => setActivePage('getstarted')}>Build our Pack</button>
+            <button className="dfm-btn-primary" onClick={handleCTA}>Build our Pack</button>
             <button className="dfm-btn-cta-ghost" onClick={() => setActivePage('solutions')}>Talk to Architect</button>
           </div>
         </div>

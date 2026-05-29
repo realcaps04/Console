@@ -224,11 +224,23 @@ function App() {
   const [openFaq, setOpenFaq] = useState(null);
   const [isQueryModalOpen, setIsQueryModalOpen] = useState(false);
   const [isLearningModalOpen, setIsLearningModalOpen] = useState(false);
+  const [supportEmail, setSupportEmail] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportStatus, setSupportStatus] = useState(null); // 'success' | 'error' | null
   const [session, setSession] = useState(null);
   const [isLearner, setIsLearner] = useState(false);
   const [learnerCourses, setLearnerCourses] = useState([]);
   const sessionRef = useRef(null);
   const reviewCarouselRef = useRef(null);
+
+  // Auto-fill the support email from the active session whenever the modal opens
+  useEffect(() => {
+    if (isQueryModalOpen) {
+      setSupportEmail(session?.user?.email || '');
+      setSupportMessage('');
+      setSupportStatus(null);
+    }
+  }, [isQueryModalOpen]);
 
   const scrollReviews = (direction) => {
     if (reviewCarouselRef.current) {
@@ -267,11 +279,12 @@ function App() {
   // Fetch is_learner flag and learner courses from Supabase
   const fetchLearnerStatus = async (user) => {
     try {
+      // .maybeSingle() returns null (not a 406 error) when no row is found
       const { data: profile } = await supabase
         .from('users')
         .select('is_learner')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (profile?.is_learner) {
         setIsLearner(true);
@@ -280,7 +293,7 @@ function App() {
           .from('Learners')
           .select('focus_areas, primary_goal')
           .eq('email', user.email)
-          .single();
+          .maybeSingle();
         if (learner) {
           setLearnerCourses(learner.focus_areas || []);
         }
@@ -769,9 +782,9 @@ function App() {
         ) : activePage === 'learnerdashboard' ? (
           <LearnerDashboard setActivePage={setActivePage} />
         ) : activePage === 'projectdevelopment' ? (
-          <ProjectDevelopment setActivePage={setActivePage} />
+          <ProjectDevelopment setActivePage={setActivePage} session={session} />
         ) : activePage === 'dataflowmanagement' ? (
-          <DataFlowManagement setActivePage={setActivePage} />
+          <DataFlowManagement setActivePage={setActivePage} session={session} />
         ) : activePage === 'languagelearning' ? (
           <LanguageLearning setActivePage={setActivePage} />
         ) : (
@@ -867,25 +880,64 @@ function App() {
 
         {/* Support Query Modal */}
         {isQueryModalOpen && (
-          <div className="modal-overlay" onClick={() => setIsQueryModalOpen(false)}>
+          <div className="modal-overlay" onClick={() => { setIsQueryModalOpen(false); setSupportStatus(null); }}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>Submit a Query</h3>
-                <button className="modal-close" onClick={() => setIsQueryModalOpen(false)}>
+                <button className="modal-close" onClick={() => { setIsQueryModalOpen(false); setSupportStatus(null); }}>
                   <X size={20} />
                 </button>
               </div>
               <div className="modal-body">
                 <p>Have a question that's not answered in the FAQ? Send it directly to our support team.</p>
-                <form onSubmit={(e) => { e.preventDefault(); setIsQueryModalOpen(false); alert("Your query has been sent to our team!"); }}>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSupportStatus(null);
+                  const { error } = await supabase
+                    .from('support_users')
+                    .insert([{ email: supportEmail, message: supportMessage }]);
+                  if (error) {
+                    console.error('Support query error:', error.message);
+                    setSupportStatus('error');
+                  } else {
+                    setSupportStatus('success');
+                    setSupportEmail('');
+                    setSupportMessage('');
+                    setTimeout(() => { setIsQueryModalOpen(false); setSupportStatus(null); }, 2000);
+                  }
+                }}>
                   <div className="form-group">
                     <label>Email Address</label>
-                    <input type="email" placeholder="you@company.com" required className="form-input" />
+                    <input
+                      type="email"
+                      placeholder="you@company.com"
+                      required
+                      className="form-input"
+                      value={supportEmail}
+                      onChange={(e) => setSupportEmail(e.target.value)}
+                    />
                   </div>
                   <div className="form-group">
                     <label>Your Question</label>
-                    <textarea placeholder="How can we help?" rows="4" required className="form-input"></textarea>
+                    <textarea
+                      placeholder="How can we help?"
+                      rows="4"
+                      required
+                      className="form-input"
+                      value={supportMessage}
+                      onChange={(e) => setSupportMessage(e.target.value)}
+                    ></textarea>
                   </div>
+                  {supportStatus === 'success' && (
+                    <div style={{ color: '#10b981', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+                      ✓ Your query has been sent to our team!
+                    </div>
+                  )}
+                  {supportStatus === 'error' && (
+                    <div style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+                      ✕ Something went wrong. Please try again.
+                    </div>
+                  )}
                   <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem' }}>Send Message</button>
                 </form>
               </div>

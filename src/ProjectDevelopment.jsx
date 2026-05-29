@@ -105,7 +105,9 @@ const lifecycle = [
   },
 ];
 
-export default function ProjectDevelopment({ setActivePage }) {
+export default function ProjectDevelopment({ setActivePage, session }) {
+  // Logged-in users go to their dashboard; guests go to get-started
+  const handleCTA = () => setActivePage(session ? 'userprojects' : 'getstarted');
   const [searchQuery, setSearchQuery] = useState('');
 
   const displayed = blueprints.filter((b) =>
@@ -130,7 +132,7 @@ export default function ProjectDevelopment({ setActivePage }) {
         </div>
         <div className="pd-nav-right">
           <Search size={16} className="pd-nav-search-icon" />
-          <button className="pd-btn-primary" onClick={() => setActivePage('getstarted')}>
+          <button className="pd-btn-primary" onClick={handleCTA}>
             Get Started
           </button>
         </div>
@@ -147,10 +149,12 @@ export default function ProjectDevelopment({ setActivePage }) {
             We engineer digital foundations through a rigorous architectural lens. Our methodology transforms complex business logic into high-performance, resilient infrastructure, built for scale.
           </p>
           <div className="pd-hero-actions">
-            <button className="pd-btn-primary" onClick={() => setActivePage('getstarted')}>
+            <button className="pd-btn-primary" onClick={handleCTA}>
               Initiate Protocol
             </button>
-            <button className="pd-btn-secondary" onClick={() => setActivePage('solutions')}>
+            <button className="pd-btn-secondary" onClick={() => {
+              document.querySelector('.pd-blueprint-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
               View Schema
             </button>
           </div>
@@ -268,10 +272,12 @@ export default function ProjectDevelopment({ setActivePage }) {
           <h2>Ready to architect your next breakthrough?</h2>
           <p>Join the league of enterprises building on Console's precision framework.</p>
           <div className="pd-cta-actions">
-            <button className="pd-btn-primary" onClick={() => setActivePage('getstarted')}>
+            <button className="pd-btn-primary" onClick={handleCTA}>
               Start Engineering
             </button>
-            <button className="pd-btn-outline" onClick={() => setActivePage('solutions')}>
+            <button className="pd-btn-outline" onClick={() => {
+              document.querySelector('.pd-root')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
               Schedule a Consultation
             </button>
           </div>
