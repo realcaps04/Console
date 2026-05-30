@@ -342,6 +342,10 @@ const LearnerRegistration = ({ setActivePage }) => {
               first_name: form.firstName.trim(),
               last_name: form.lastName.trim(),
               role: 'learner',
+              qualification: form.qualification,
+              primary_goal: selectedGoal,
+              focus_areas: selectedAreas,
+              agreed_terms: form.agreed,
             }
           }
         });
@@ -350,23 +354,35 @@ const LearnerRegistration = ({ setActivePage }) => {
         if (!authData.user) throw new Error('Account creation failed. Please try again.');
 
         // Step 2: Insert learner profile into public.Learners (no password stored)
-        const { error: profileError } = await supabase
-          .from('Learners')
-          .insert([{
-            id:            authData.user.id,
-            first_name:    form.firstName.trim(),
-            last_name:     form.lastName.trim(),
-            email:         form.email.trim().toLowerCase(),
-            qualification: form.qualification,
-            primary_goal:  selectedGoal,
-            focus_areas:   selectedAreas,
-            agreed_terms:  form.agreed,
-          }]);
+        // If email confirmation is enabled, we won't have a session yet, so we skip the insert
+        // to avoid a 401 Unauthorized error from RLS policies.
+        if (authData.session) {
+          const { error: profileError } = await supabase
+            .from('Learners')
+            .insert([{
+              id:            authData.user.id,
+              first_name:    form.firstName.trim(),
+              last_name:     form.lastName.trim(),
+              email:         form.email.trim().toLowerCase(),
+              qualification: form.qualification,
+              primary_goal:  selectedGoal,
+              focus_areas:   selectedAreas,
+              agreed_terms:  form.agreed,
+            }]);
 
-        if (profileError) throw profileError;
+          if (profileError) {
+            console.warn('Profile insert warning:', profileError);
+          }
+        }
 
         setStep(3, 'verified');
-        setSubmitState('success');
+        
+        // If there's no session, they need to verify their email
+        if (!authData.session) {
+          setSubmitState('verify_email');
+        } else {
+          setSubmitState('success');
+        }
 
         // Persist learner identity for the dashboard
         sessionStorage.setItem('ld_firstName', form.firstName.trim());
@@ -816,7 +832,7 @@ return (
               const C = 2 * Math.PI * R;  // circumference ≈ 339.3
               const offset = C - (progressPct / 100) * C;
               const isProcessing = stepStates.some(s => s === 'processing');
-              const isDone = submitState === 'success';
+              const isDone = submitState === 'success' || submitState === 'verify_email';
               return (
                 <div className="lr-modal-icon-wrap">
                   {/* SVG ring: track + progress arc + spin arc */}
@@ -917,6 +933,25 @@ return (
               >
                 Enter Console Learning →
               </button>
+            )}
+
+            {/* Verify Email action */}
+            {submitState === 'verify_email' && (
+              <div style={{ textAlign: 'center', marginTop: '1rem', width: '100%' }}>
+                <p style={{ color: '#0f172a', fontWeight: '700', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Check your email!</p>
+                <p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+                  We've sent a verification link to <strong style={{color: '#0f172a'}}>{form.email.trim().toLowerCase()}</strong>.<br/>Please verify your account before logging in.
+                </p>
+                <button
+                  className="lr-modal-done"
+                  onClick={() => {
+                    setShowModal(false);
+                    setActivePage('learnerlogin');
+                  }}
+                >
+                  Go to Login →
+                </button>
+              </div>
             )}
 
             {/* Error retry */}

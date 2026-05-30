@@ -50,6 +50,26 @@ const LearnerLogin = ({ setActivePage }) => {
       if (authError) throw authError;
 
       if (data.session) {
+        // If email verification was required, the Learner profile might not have been created yet.
+        // We can safely create/upsert it here using the metadata saved during registration.
+        const meta = data.user.user_metadata || {};
+        if (meta.role === 'learner') {
+          const { error: profileCheckError } = await supabase
+            .from('Learners')
+            .upsert([{
+              id:            data.user.id,
+              first_name:    meta.first_name || '',
+              last_name:     meta.last_name || '',
+              email:         data.user.email,
+              qualification: meta.qualification || '',
+              primary_goal:  meta.primary_goal || '',
+              focus_areas:   meta.focus_areas || [],
+              agreed_terms:  meta.agreed_terms || true,
+            }], { onConflict: 'id' });
+            
+          if (profileCheckError) console.warn('Profile sync warning:', profileCheckError);
+        }
+
         // Redirection logic can be handled here or in App level
         // For now, let's just go to the dashboard if successful
         setActivePage('learnerdashboard');
