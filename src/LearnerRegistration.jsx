@@ -289,9 +289,8 @@ const LearnerRegistration = ({ setActivePage }) => {
     return 'Something went wrong while creating your account. Please try again or contact support.';
   };
 
-  /* Finalize Account → show modal, animate steps, then insert */
   const handleFinalize = async () => {
-    if (submitState === 'success') return;   // already registered
+    if (submitState === 'success' || submitState === 'verify_email') return;
 
     // ── Pre-check: does a user account already exist with this email? ──
     const { data: existingUser } = await supabase
@@ -300,10 +299,19 @@ const LearnerRegistration = ({ setActivePage }) => {
       .eq('email', form.email.trim().toLowerCase())
       .maybeSingle();
 
-    if (existingUser && !existingUser.is_learner) {
-      // A platform user exists with this email but is NOT yet a learner
-      setShowConflictPopup(true);
-      return;
+    if (existingUser) {
+      if (!existingUser.is_learner) {
+        // A platform user exists with this email but is NOT yet a learner
+        setShowConflictPopup(true);
+        return;
+      } else {
+        // They are ALREADY a learner! 
+        setShowModal(true);
+        setStepStates(Array(STEP_COUNT).fill('error'));
+        setSubmitError('An account with this email already exists. Please sign in instead.');
+        setSubmitState('error');
+        return;
+      }
     }
 
     // No conflict — proceed with registration
