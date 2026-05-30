@@ -18,6 +18,7 @@ export default function GetStarted({ setActivePage }) {
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
   const [passwordMismatchPopup, setPasswordMismatchPopup] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,7 +74,7 @@ export default function GetStarted({ setActivePage }) {
 
       if (error) {
         console.error('Signup error:', error);
-        if (error.status === 429 || error.message?.toLowerCase().includes('rate limit')) {
+        if (error.status === 429 || error.message?.toLowerCase().includes('rate limit') || error.message?.toLowerCase().includes('security purposes')) {
           setErrorMsg('Too many sign-up attempts. Please wait a few minutes and try again.');
         } else if (error.message?.toLowerCase().includes('already registered') || error.message?.toLowerCase().includes('already exists')) {
           setErrorMsg('An account with this email already exists. Sign in instead.');
@@ -86,31 +87,27 @@ export default function GetStarted({ setActivePage }) {
       if (data.user) {
         console.log('User created successfully:', data.user);
         
-        // Check if user was inserted into public.users table
+        // Check if user was inserted into public.users table (use maybeSingle to avoid 406 if trigger is slightly delayed)
         const { data: userProfile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', data.user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Profile check error:', profileError);
-          // User was created in auth but not in public.users - this indicates trigger issue
-          setErrorMsg('Account created but profile setup failed. Please contact support.');
+          setErrorMsg('Account created but profile setup encountered an issue. Please contact support.');
           return;
         }
 
+        if (!userProfile) {
+          console.warn('Profile row not found yet. The trigger might be delayed.');
+        }
+
         console.log('User profile created:', userProfile);
-        setSuccessMsg('Account created successfully! Redirecting...');
         
-        // Redirect after success
-        setTimeout(() => {
-          if (data.session) {
-            setActivePage('home');
-          } else {
-            setActivePage('home');
-          }
-        }, 1500);
+        // Show the verification modal instead of redirecting automatically
+        setShowVerificationModal(true);
       }
     } catch (err) {
       setLoading(false);
@@ -311,6 +308,34 @@ export default function GetStarted({ setActivePage }) {
               onClick={() => setPasswordMismatchPopup(false)}
             >
               Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Email Verification Modal */}
+      {showVerificationModal && (
+        <div className="gs-popup-overlay">
+          <div className="gs-popup" style={{ maxWidth: '420px', padding: '2.5rem 2rem' }}>
+            <div style={{ width: '64px', height: '64px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+              <span style={{ fontSize: '32px' }}>✉️</span>
+            </div>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#0f172a' }}>Verify Your Email</h3>
+            <p style={{ color: '#475569', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+              We've sent a verification link to <strong>{email}</strong>. Please check your inbox and click the link to activate your account before signing in.
+            </p>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '2rem' }}>
+              If you don't see the email, check your spam or junk folder.
+            </p>
+            <button 
+              className="gs-popup-btn" 
+              onClick={() => {
+                setShowVerificationModal(false);
+                setActivePage('signin');
+              }}
+              style={{ background: '#0f172a', width: '100%', padding: '0.85rem', borderRadius: '0.5rem', color: '#fff', fontWeight: '600' }}
+            >
+              Continue to Sign In
             </button>
           </div>
         </div>

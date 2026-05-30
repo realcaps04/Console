@@ -56,7 +56,11 @@ const LearnerLogin = ({ setActivePage }) => {
       }
     } catch (err) {
       console.error('Auth Error:', err.message);
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      if (err.message.toLowerCase().includes('email not confirmed')) {
+        setError('Please verify your email address before logging in. Check your inbox for the verification link.');
+      } else {
+        setError(err.message || 'Authentication failed. Please check your credentials.');
+      }
     } finally {
       setLoading(false);
     }

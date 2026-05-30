@@ -340,525 +340,77 @@ const LearnerDashboard = ({ setActivePage }) => {
           {/* ═══════════════════════════════
                MY COURSES VIEW
           ═══════════════════════════════ */}
-          {activeNav === 'courses' && (() => {
-            const filtered = COURSES.filter(c => {
-              if (courseFilter === 'progress') return c.status === 'progress';
-              if (courseFilter === 'completed') return c.status === 'completed';
-              return true;
-            });
-            return (
-              <div className="mc-page">
-                {/* Page Header */}
-                <div className="mc-header">
-                  <div>
-                    <h1 className="mc-title">My Courses</h1>
-                    <p className="mc-subtitle">Continue where you left off. You have 3 active modules today.</p>
-                  </div>
-                </div>
-
-                {/* Filter Bar */}
-                <div className="mc-filter-bar">
-                  <div className="mc-tabs">
-                    {[['all', 'All Courses'], ['progress', 'In Progress'], ['completed', 'Completed']].map(([key, label]) => (
-                      <button
-                        key={key}
-                        className={`mc-tab ${courseFilter === key ? 'mc-tab--active' : ''}`}
-                        onClick={() => setCourseFilter(key)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <button className="mc-sort-btn">
-                    <SlidersHorizontal size={14} />
-                    Sort by: Recent
-                  </button>
-                </div>
-
-                {/* Courses Grid */}
-                <div className="mc-grid">
-                  {filtered.map(course => (
-                    <div key={course.id} className="mc-card">
-                      {/* Thumbnail */}
-                      <div className="mc-card-img-wrap">
-                        <img src={course.img} alt={course.title} className="mc-card-img" />
-                        <span className="mc-level-badge">{course.level}</span>
-                      </div>
-
-                      {/* Body */}
-                      <div className="mc-card-body">
-                        {/* Title row */}
-                        <div className="mc-card-title-row">
-                          <h3 className="mc-card-title">{course.title}</h3>
-                          <span className="mc-module-badge">Module<br />{course.module}</span>
-                        </div>
-
-                        {/* Instructor */}
-                        <div className="mc-instructor">
-                          <User size={12} />
-                          <span>{course.instructor}</span>
-                        </div>
-
-                        {/* Progress */}
-                        <div className="mc-progress-wrap">
-                          <div className="mc-progress-label-row">
-                            <span className="mc-progress-label">Progress</span>
-                            <span className="mc-progress-pct" style={{ color: course.progress >= 80 ? '#10b981' : '#3b5fe2' }}>{course.progress}%</span>
-                          </div>
-                          <div className="mc-progress-track">
-                            <div className="mc-progress-fill" style={{ width: `${course.progress}%`, background: course.progress >= 80 ? '#10b981' : '#3b5fe2' }} />
-                          </div>
-                        </div>
-
-                        {/* CTA */}
-                        <button className="mc-continue-btn" onClick={() => setActiveNav('module_view')}>
-                          Continue Module <ChevronRight size={14} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Enroll CTA card */}
-                  <button className="mc-enroll-card" onClick={() => setActiveNav('skills')}>
-                    <div className="mc-enroll-icon">
-                      <Plus size={28} />
-                    </div>
-                    <h4 className="mc-enroll-title">Enroll in New Course</h4>
-                    <p className="mc-enroll-sub">Explore 200+ technical modules in our catalog.</p>
-                  </button>
-                </div>
+          {activeNav === 'courses' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', color: '#64748b' }}>
+              <div style={{ width: '64px', height: '64px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <BookOpen size={32} color="#3b5fe2" />
               </div>
-            );
-          })()}
+              <h2 style={{ color: '#0f172a', fontSize: '1.75rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                No active courses
+              </h2>
+              <p style={{ maxWidth: '420px', lineHeight: '1.6', marginBottom: '2rem' }}>
+                You haven't enrolled in any courses yet. Explore our curated pathways to start your learning journey.
+              </p>
+              <button 
+                onClick={() => setActiveNav('skills')} 
+                style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '6px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                Browse Pathways
+              </button>
+            </div>
+          )}
 
           {/* ═══════════════════════════════
                DASHBOARD VIEW
           ═══════════════════════════════ */}
           {activeNav === 'dashboard' && (
-          <>
-          {/* Greeting row */}
-          <div className="ld-greeting-row">
-            <div className="ld-greeting-text">
-              <h1 className="ld-greeting">Hello, {sessionStorage.getItem('ld_firstName') || 'Learner'}! Ready to build today?</h1>
-              <p className="ld-greeting-sub">You're making great progress. Stick to the plan!</p>
-            </div>
-            {/* Milestone progress */}
-            <div className="ld-milestone-progress">
-              <svg width="56" height="56" viewBox="0 0 56 56">
-                <circle cx="28" cy="28" r="24" fill="none" stroke="#e2e8f0" strokeWidth="5" />
-                <circle cx="28" cy="28" r="24" fill="none" stroke="#3b5fe2" strokeWidth="5"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 24 * 0.45} ${2 * Math.PI * 24 * 0.55}`}
-                  transform="rotate(-90 28 28)"
-                />
-                <text x="50%" y="54%" dominantBaseline="middle" textAnchor="middle" fontSize="11" fontWeight="700" fill="#0f172a">45%</text>
-              </svg>
-              <div className="ld-ms-text">
-                <span className="ld-ms-label">Milestone Progress</span>
-                <span className="ld-ms-sub">45% of the way to the first milestone</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', color: '#64748b' }}>
+              <div style={{ width: '64px', height: '64px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <LayoutDashboard size={32} color="#3b5fe2" />
               </div>
+              <h2 style={{ color: '#0f172a', fontSize: '1.75rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                Hello, {sessionStorage.getItem('ld_firstName') || 'Learner'}!
+              </h2>
+              <p style={{ maxWidth: '420px', lineHeight: '1.6', marginBottom: '2rem' }}>
+                Welcome to your workspace. Your active courses, upcoming assignments, and learning milestones will appear here once you begin.
+              </p>
+              <button 
+                onClick={() => setActiveNav('skills')} 
+                style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '6px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                Browse Pathways
+              </button>
             </div>
-          </div>
-
-          {/* Hero + right panel */}
-          <div className="ld-hero-row">
-            {/* Active course card */}
-            <div className="ld-course-card">
-              <div className="ld-course-badges">
-                <span className="ld-course-pill">ACTIVE COURSE</span>
-                <span className="ld-course-modules">+12 Modules Remaining</span>
-              </div>
-              <div className="ld-course-body">
-                <h2 className="ld-course-title">Introduction to Web Development</h2>
-                <p className="ld-course-mastering">Currently Mastering: <strong>CSS Flexbox</strong></p>
-                <button className="ld-resume-btn">
-                  <Play size={14} fill="currentColor" />
-                  Resume Learning
-                </button>
-              </div>
-              <div className="ld-course-progress-bar-wrap">
-                <span className="ld-course-progress-label">MODULE 4 OF 12 • 65% COMPLETE</span>
-                <div className="ld-course-progress-track">
-                  <div className="ld-course-progress-fill" style={{ width: '65%' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Next Up + Pro Tip */}
-            <div className="ld-right-panel">
-              <div className="ld-next-up-header">
-                <span className="ld-next-up-title">Next Up</span>
-                <span className="ld-next-up-viewall">View All</span>
-              </div>
-              {TASKS.map((t, i) => (
-                <div key={i} className="ld-task">
-                  <div className="ld-task-icon" style={{ color: t.color }}>{t.icon}</div>
-                  <div className="ld-task-info">
-                    <span className="ld-task-name">{t.title}</span>
-                    <span className="ld-task-due">{t.due}</span>
-                  </div>
-                </div>
-              ))}
-              <div className="ld-pro-tip">
-                <span className="ld-pro-tip-label">PRO TIP</span>
-                <p className="ld-pro-tip-text">"Consistency is the key to mastering code. Even 15 minutes a day makes a difference."</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Milestones */}
-          <div className="ld-section">
-            <h3 className="ld-section-title">Your Milestones</h3>
-            <div className="ld-milestones">
-              {MILESTONES.map((m, i) => (
-                <div key={i} className={`ld-milestone ${m.done ? 'ld-milestone--done' : ''}`}>
-                  <span className="ld-milestone-icon" style={{ color: m.color }}>{m.icon}</span>
-                  <span className="ld-milestone-name">{m.name}</span>
-                  <span className="ld-milestone-sub">{m.sub}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Handpicked */}
-          <div className="ld-section">
-            <div className="ld-section-header">
-              <h3 className="ld-section-title">Handpicked for You</h3>
-              <div className="ld-carousel-arrows">
-                <button className="ld-arrow" onClick={() => setResourceIdx((i) => (i - 1 + RESOURCES.length) % RESOURCES.length)}>
-                  <ChevronLeft size={14} strokeWidth={2.5} />
-                </button>
-                <button className="ld-arrow" onClick={() => setResourceIdx((i) => (i + 1) % RESOURCES.length)}>
-                  <ChevronRight size={14} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-            <div className="ld-resources">
-              {visibleResources.map((r, i) => (
-                <div key={i} className="ld-resource-card">
-                  <div className="ld-resource-img-wrap">
-                    <img src={r.img} alt={r.title} className="ld-resource-img" />
-                    <span className="ld-resource-tag" style={{ background: r.tagColor }}>{r.tag}</span>
-                  </div>
-                  <div className="ld-resource-body">
-                    <h4 className="ld-resource-title">{r.title}</h4>
-                    <p className="ld-resource-desc">{r.desc}</p>
-                    <div className="ld-resource-footer">
-                      <span className="ld-resource-time">{r.time}</span>
-                      <span className="ld-resource-cta">{r.cta}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          </>
           )}
 
           {/* ═══════════════════════════════
                ASSIGNMENTS VIEW
           ═══════════════════════════════ */}
           {activeNav === 'assignments' && (
-            <div className="am-page">
-              {/* Header */}
-              <div className="am-header">
-                <h1 className="am-title">Assignments Management</h1>
-                <p className="am-subtitle">
-                  Streamline your academic progress. Manage active tasks, track real-time feedback, and maintain your submission workflow in one precision workspace.
-                </p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', color: '#64748b' }}>
+              <div style={{ width: '64px', height: '64px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <ClipboardList size={32} color="#3b5fe2" />
               </div>
-
-              {/* Active Assignments Section */}
-              <div className="am-section">
-                <div className="am-section-header">
-                  <h2 className="am-section-title">Active Assignments</h2>
-                  <a href="#" className="am-view-all">View All Schedule</a>
-                </div>
-                
-                <div className="am-assignments-grid">
-                  {/* Card 1 */}
-                  <div className="am-card">
-                    <div className="am-card-header">
-                      <div className="am-card-icon-box am-icon-code">
-                        <Code size={16} strokeWidth={2.5} />
-                      </div>
-                      <span className="am-badge am-badge-high">HIGH PRIORITY</span>
-                    </div>
-                    <div className="am-card-body">
-                      <h3 className="am-card-title">Neural Networks Lab</h3>
-                      <p className="am-card-subtitle">CS 402 • Dr. Aris Thorne</p>
-                      
-                      <div className="am-progress-container">
-                        <div className="am-progress-text">
-                          <span>Progress</span>
-                          <span className="am-progress-value am-val-high">65%</span>
-                        </div>
-                        <div className="am-progress-bar">
-                          <div className="am-progress-fill am-fill-high" style={{ width: '65%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="am-card-footer">
-                      <Clock size={12} className="am-footer-icon" />
-                      <span>Due in 2 days (Oct 24, 11:59 PM)</span>
-                    </div>
-                    <div className="am-card-actions">
-                      <button className="am-btn-action am-btn-view" onClick={() => setShowPdfModal(true)}>View</button>
-                      <button className="am-btn-action am-btn-upload" onClick={() => setShowUploadModal(true)}>Upload</button>
-                    </div>
-                  </div>
-
-                  {/* Card 2 */}
-                  <div className="am-card">
-                    <div className="am-card-header">
-                      <div className="am-card-icon-box am-icon-db">
-                        <Database size={16} strokeWidth={2.5} />
-                      </div>
-                      <span className="am-badge am-badge-std">STANDARD</span>
-                    </div>
-                    <div className="am-card-body">
-                      <h3 className="am-card-title">Database Sharding</h3>
-                      <p className="am-card-subtitle">CS 305 • Prof. Liao</p>
-                      
-                      <div className="am-progress-container">
-                        <div className="am-progress-text">
-                          <span>Progress</span>
-                          <span className="am-progress-value am-val-std">20%</span>
-                        </div>
-                        <div className="am-progress-bar">
-                          <div className="am-progress-fill am-fill-std" style={{ width: '20%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="am-card-footer">
-                      <Clock size={12} className="am-footer-icon" />
-                      <span>Due in 5 days (Oct 27, 09:00 AM)</span>
-                    </div>
-                    <div className="am-card-actions">
-                      <button className="am-btn-action am-btn-view" onClick={() => setShowPdfModal(true)}>View</button>
-                      <button className="am-btn-action am-btn-upload" onClick={() => setShowUploadModal(true)}>Upload</button>
-                    </div>
-                  </div>
-
-                  {/* Card 3 */}
-                  <div className="am-card">
-                    <div className="am-card-header">
-                      <div className="am-card-icon-box am-icon-code">
-                        <FileCode size={16} strokeWidth={2.5} />
-                      </div>
-                      <span className="am-badge am-badge-std">STANDARD</span>
-                    </div>
-                    <div className="am-card-body">
-                      <h3 className="am-card-title">Frontend Architecture</h3>
-                      <p className="am-card-subtitle">CS 210 • Dr. Roberts</p>
-                      
-                      <div className="am-progress-container">
-                        <div className="am-progress-text">
-                          <span>Progress</span>
-                          <span className="am-progress-value am-val-std">85%</span>
-                        </div>
-                        <div className="am-progress-bar">
-                          <div className="am-progress-fill am-fill-std" style={{ width: '85%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="am-card-footer">
-                      <Clock size={12} className="am-footer-icon" />
-                      <span>Due tomorrow</span>
-                    </div>
-                    <div className="am-card-actions">
-                      <button className="am-btn-action am-btn-view" onClick={() => setShowPdfModal(true)}>View</button>
-                      <button className="am-btn-action am-btn-upload" onClick={() => setShowUploadModal(true)}>Upload</button>
-                    </div>
-                  </div>
-
-                  {/* Card 4 */}
-                  <div className="am-card">
-                    <div className="am-card-header">
-                      <div className="am-card-icon-box am-icon-db">
-                        <Database size={16} strokeWidth={2.5} />
-                      </div>
-                      <span className="am-badge am-badge-high">HIGH</span>
-                    </div>
-                    <div className="am-card-body">
-                      <h3 className="am-card-title">Distributed Systems</h3>
-                      <p className="am-card-subtitle">CS 501 • Prof. Kim</p>
-                      
-                      <div className="am-progress-container">
-                        <div className="am-progress-text">
-                          <span>Progress</span>
-                          <span className="am-progress-value am-val-high">0%</span>
-                        </div>
-                        <div className="am-progress-bar">
-                          <div className="am-progress-fill am-fill-high" style={{ width: '0%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="am-card-footer">
-                      <Clock size={12} className="am-footer-icon" />
-                      <span>Due in 3 days</span>
-                    </div>
-                    <div className="am-card-actions">
-                      <button className="am-btn-action am-btn-view" onClick={() => setShowPdfModal(true)}>View</button>
-                      <button className="am-btn-action am-btn-upload">Upload</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Assignment PDF Modal */}
-              {showPdfModal && (
-                <div className="am-pdf-modal-overlay" onClick={() => setShowPdfModal(false)}>
-                  <div className="am-pdf-modal-content" onClick={(e) => e.stopPropagation()}>
-                    <div className="am-pdf-modal-header">
-                      <h3 className="am-pdf-modal-title">Assignment Details (PDF)</h3>
-                      <button className="am-pdf-modal-close" onClick={() => setShowPdfModal(false)}>
-                        <X size={20} />
-                      </button>
-                    </div>
-                    <div className="am-pdf-modal-body">
-                      {/* Generic dummy PDF embedding */}
-                      <iframe 
-                        src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
-                        title="Assignment Details" 
-                        className="am-pdf-iframe"
-                        style={{ border: 'none', width: '100%', height: '100%' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {/* Assignment Upload Modal */}
-              {showUploadModal && (
-                <div className="am-pdf-modal-overlay" onClick={() => setShowUploadModal(false)}>
-                  <div className="am-upload-modal-content" onClick={(e) => e.stopPropagation()}>
-                    <div className="am-pdf-modal-header">
-                      <h3 className="am-pdf-modal-title">Submit Link</h3>
-                      <button className="am-pdf-modal-close" onClick={() => setShowUploadModal(false)}>
-                        <X size={20} />
-                      </button>
-                    </div>
-                    <div className="am-upload-modal-body">
-                      <p className="am-upload-desc">Please provide a link to your assignment. Accepted domains: <strong>github.com, docs.google.com, vercel.app, netlify.app</strong>.</p>
-                      <input 
-                        type="url" 
-                        placeholder="https://..." 
-                        className="am-upload-input"
-                        value={uploadUrl}
-                        onChange={(e) => {
-                          setUploadUrl(e.target.value);
-                          setUploadError('');
-                        }}
-                      />
-                      {uploadError && <div className="am-upload-error">{uploadError}</div>}
-                      <button className="am-upload-submit-btn" onClick={handleUploadSubmit}>Submit Assignment</button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <h2 style={{ color: '#0f172a', fontSize: '1.75rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                All caught up
+              </h2>
+              <p style={{ maxWidth: '420px', lineHeight: '1.6', marginBottom: '2rem' }}>
+                You have no active assignments. Once you enroll in a course, your upcoming tasks and due dates will appear here.
+              </p>
             </div>
           )}
 
           {activeNav === 'skills' && (
-            <div className="sk-page">
-              <section className="sk-hero">
-                <div className="sk-hero-copy">
-                  <span className="sk-eyebrow">ENROLLMENT HUB</span>
-                  <h1 className="sk-title">Explore your next skills path</h1>
-                  <p className="sk-subtitle">
-                    {learnerGoalCopy[goal] || learnerGoalCopy.skills} Choose a pathway, enroll, and keep building momentum from one place.
-                  </p>
-
-                  <div className="sk-focus-row">
-                    {focusAreas.map((area) => (
-                      <span key={area} className="sk-focus-chip">{area}</span>
-                    ))}
-                  </div>
-
-                  <div className="sk-hero-actions">
-                    <button className="sk-primary-btn">Browse all pathways</button>
-                    <button className="sk-secondary-btn" onClick={() => setActiveNav('courses')}>
-                      Back to My Courses
-                    </button>
-                  </div>
-                </div>
-
-                <div className="sk-hero-panel">
-                  <div className="sk-stat-card">
-                    <span className="sk-stat-label">Recommended now</span>
-                    <strong className="sk-stat-value">{SKILL_PATHS.length} skill tracks</strong>
-                    <span className="sk-stat-sub">Matched to your current learner profile</span>
-                  </div>
-                  <div className="sk-stat-card">
-                    <span className="sk-stat-label">Weekly pace</span>
-                    <strong className="sk-stat-value">5-7 hrs</strong>
-                    <span className="sk-stat-sub">Designed to fit consistent after-class progress</span>
-                  </div>
-                  <div className="sk-stat-card sk-stat-card--accent">
-                    <Sparkles size={18} />
-                    <div>
-                      <strong>Skill boost mode</strong>
-                      <p>Blend hands-on lessons, assignments, and live sessions inside one pathway.</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="sk-section">
-                <div className="sk-section-header">
-                  <div>
-                    <h2 className="sk-section-title">Recommended for you</h2>
-                    <p className="sk-section-subtitle">Each path is ready for enrollment and tailored to practical technical growth.</p>
-                  </div>
-                </div>
-
-                <div className="sk-grid">
-                  {SKILL_PATHS.map((path) => (
-                    <article key={path.id} className="sk-card">
-                      <div className="sk-card-top">
-                        <span className="sk-card-tag">{path.tag}</span>
-                        <span className="sk-card-icon" style={{ background: path.bg, color: path.accent }}>
-                          {path.icon}
-                        </span>
-                      </div>
-
-                      <h3 className="sk-card-title">{path.title}</h3>
-                      <p className="sk-card-desc">{path.description}</p>
-
-                      <div className="sk-card-meta">
-                        <span>{path.duration}</span>
-                        <span>{path.format}</span>
-                      </div>
-
-                      <button className="sk-enroll-btn">Enroll now</button>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              <section className="sk-roadmap">
-                <div className="sk-roadmap-copy">
-                  <span className="sk-eyebrow sk-eyebrow--muted">NEXT STEPS</span>
-                  <h2 className="sk-section-title">Build a stronger weekly learning rhythm</h2>
-                  <p className="sk-section-subtitle">
-                    Start with one focused pathway, complete the related assignments, and use live sessions to reinforce difficult topics faster.
-                  </p>
-                </div>
-
-                <div className="sk-roadmap-steps">
-                  {[
-                    'Choose one pathway aligned with your current goal.',
-                    'Complete the first lesson and schedule your practice block.',
-                    'Track your assignments and return to My Courses to continue.',
-                  ].map((step, index) => (
-                    <div key={step} className="sk-step-card">
-                      <span className="sk-step-index">0{index + 1}</span>
-                      <p>{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', textAlign: 'center', color: '#64748b' }}>
+              <div style={{ width: '64px', height: '64px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                <Sparkles size={32} color="#3b5fe2" />
+              </div>
+              <h2 style={{ color: '#0f172a', fontSize: '1.75rem', marginBottom: '0.75rem', fontWeight: '600' }}>
+                Pathways coming soon
+              </h2>
+              <p style={{ maxWidth: '420px', lineHeight: '1.6', marginBottom: '2rem' }}>
+                Our curated skill tracks are currently being updated. Check back shortly to explore and enroll in new pathways.
+              </p>
             </div>
           )}
 

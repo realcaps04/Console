@@ -54,7 +54,11 @@ export default function SignIn({ setActivePage }) {
     setLoading(false);
 
     if (error) {
-      setErrorMsg(error.message);
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setErrorMsg('Please verify your email address before logging in. Check your inbox for the verification link.');
+      } else {
+        setErrorMsg(error.message);
+      }
     } else {
       setSuccessMsg("Welcome back!");
       setActivePage('home');

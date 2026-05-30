@@ -64,6 +64,9 @@
 .ld-header-nav {
   display: flex;
   gap: 1.5rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .ld-header-link {
